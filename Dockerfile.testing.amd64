@@ -1,52 +1,26 @@
+# Testing alpine:
+
+FROM alpine:3.8 AS alpine_tester
+COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
+RUN /src/deploy-s6-overlay.sh
+
+FROM alpine:3.9 AS alpine_tester
+COPY --from=0 /init /tmp/init-prev
+COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
+RUN /src/deploy-s6-overlay.sh
+
+FROM alpine:3.10 AS alpine_tester
+COPY --from=0 /init /tmp/init-prev
+COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
+RUN /src/deploy-s6-overlay.sh
+
+FROM alpine:3.11 AS alpine_tester
+COPY --from=0 /init /tmp/init-prev
+COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
+RUN /src/deploy-s6-overlay.sh
+
 FROM alpine:latest AS alpine_tester
+COPY --from=0 /init /tmp/init-prev
 COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
 RUN /src/deploy-s6-overlay.sh
-
-FROM debian:latest AS debian_tester
-COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
-RUN /src/deploy-s6-overlay.sh
-
-FROM ubuntu:latest AS ubuntu_tester
-COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
-RUN apt-get update && \
-    apt-get install --no-install-recommends -y curl ca-certificates && \
-    /src/deploy-s6-overlay.sh
-
-FROM amazonlinux:latest AS amazonlinux_tester
-COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
-RUN /src/deploy-s6-overlay.sh
-
-FROM oraclelinux:latest AS oraclelinux_tester
-COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
-RUN /src/deploy-s6-overlay.sh
-
-FROM photonlinux:latest AS photonlinux_tester
-COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
-RUN /src/deploy-s6-overlay.sh
-
-FROM clearlinux:latest AS clearlinux_tester
-COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
-RUN /src/deploy-s6-overlay.sh
-
-FROM crux:latest AS crux_tester
-COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
-RUN /src/deploy-s6-overlay.sh
-
-FROM sl:latest AS sl_tester
-COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
-RUN /src/deploy-s6-overlay.sh
-
-FROM sourcemage:latest AS sourcemage_tester
-COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
-RUN /src/deploy-s6-overlay.sh
-
-FROM archlinux:latest AS archlinux_tester
-COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
-RUN /src/deploy-s6-overlay.sh
-
-FROM alt:latest AS alt_tester
-COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
-RUN apt-get update && \
-    apt-get install -y which curl ca-certificates && \
-    /src/deploy-s6-overlay.sh
 
