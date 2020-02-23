@@ -1,0 +1,14 @@
+FROM alpine:latest AS alpine_tester
+COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
+RUN /src/deploy-s6-overlay.sh
+
+FROM debian:latest AS debian_tester
+COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
+RUN /src/deploy-s6-overlay.sh
+
+FROM ubuntu:latest AS ubuntu_tester
+COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
+RUN apt-get update && \
+    apt-get install --no-install-recommends -y curl ca-certificates && \
+    /src/deploy-s6-overlay.sh
+
