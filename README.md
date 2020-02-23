@@ -33,6 +33,7 @@ ENTRYPOINT [ "/init" ]
 This script has been tested on the following architectures/distributions:
 
 | Distribution | `linux/amd64` | `linux/arm64` | `linux/arm/v7` | Notes |
+| ------------ |:-------------:|:-------------:|:--------------:| ----- |
 | alpine:3.8 | ✅  | ✅  | ✅  | |
 | alpine:3.9 | ✅ | ✅ | ✅ | |
 | alpine:3.10 | ✅ | ✅ | ✅ | |
