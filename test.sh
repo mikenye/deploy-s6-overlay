@@ -4,8 +4,6 @@
 
 echo "========== Testing linux/amd64 distros ==========" &&
 sudo docker buildx build --progress plain -f Dockerfile.testing.amd64 --platform linux/amd64 . &&
-echo "========== Testing linux/386 distros ==========" &&
-sudo docker buildx build --progress plain -f Dockerfile.testing.386 --platform  linux/386 . &&
 echo "========== Testing linux/arm64 distros ==========" &&
 sudo docker buildx build --progress plain -f Dockerfile.testing.arm64.v8 --platform linux/arm64 . &&
 echo "========== Testing linux/amd/v7 distros ==========" &&

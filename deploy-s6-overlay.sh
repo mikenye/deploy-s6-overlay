@@ -64,10 +64,10 @@ echo "Getting s6-overlay from: https://github.com/just-containers/s6-overlay/rel
 # Determine which version of s6 overlay to use
 if [ "$DOWNLOADER" = "curl" ]
 then
-  curl --location --output /tmp/s6-overlay.tar.gz https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz
+  curl -s --location --output /tmp/s6-overlay.tar.gz https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz
 elif [ "$DOWNLOADER" = "wget" ]
 then
-  wget -O /tmp/s6-overlay.tar.gz -q https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz
+  wget -q -O /tmp/s6-overlay.tar.gz -q https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz
 else
   echo "ERROR: could not determine downloader!"
   exit 1
