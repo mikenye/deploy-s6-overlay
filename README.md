@@ -1,6 +1,6 @@
 ## deploy-s6-overlay
 
-`deploy-s6-overlay.sh` is a helper script to deploy s6-overlay to multi-architecture containers.
+`deploy-s6-overlay.sh` is a helper script to deploy [s6-overlay](https://github.com/just-containers/s6-overlay) to multi-architecture containers.
 
 Prevents the need for per-architecture Dockerfiles.
 
