@@ -35,12 +35,15 @@ The script supports using gpg to verify the s6-overlay download. Users of this s
 An example is as follows:
 
 ```
+...
 FROM alpine:3.11
 RUN ...
     apk add --no-cache gnupg && \
     wget -q -O - https://raw.githubusercontent.com/mikenye/deploy-s6-overlay/master/deploy-s6-overlay.sh | sh && \
     apk del --no-cache gnupg && \
     ...
+ENTRYPOINT [ "/init" ]
+...
 ```
 
 In the example above, `gnupg` (and its dependencies) are added and removed in the same layer, allowing GPG verification to occur with minimal overhead.
