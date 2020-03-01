@@ -1,5 +1,7 @@
 #!/bin/sh
 
+echo "s6-overlay deployment started."
+
 # Determine which downloader to use
 # Check if curl is available
 CURLBINARY=`which curl`
@@ -21,6 +23,17 @@ else
     echo "ERROR: no downloaders available! Install curl or wget."
     exit 1
   fi
+fi
+
+# Determine if gpg is available to verify our download
+GPGBINARY=`which gpg`
+if [ $? -eq 0 ]
+then
+  echo "gpg available, will verify s6-overlay download"
+  VERIFY=1
+else
+  echo "WARNING: gpg not available! Cannot verify s6-overlay download!"
+  VERIFY=0
 fi
 
 # If S6 version not specified...
@@ -65,12 +78,36 @@ echo "Getting s6-overlay from: https://github.com/just-containers/s6-overlay/rel
 if [ "$DOWNLOADER" = "curl" ]
 then
   curl -s --location --output /tmp/s6-overlay.tar.gz https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz
+  if [ $VERIFY -eq 1 ]
+  then
+    curl -s --location --output /tmp/s6-overlay.key https://keybase.io/justcontainers/key.asc
+    curl -s --location --output /tmp/s6-overlay.tar.gz.sig https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz.sig
+  fi
 elif [ "$DOWNLOADER" = "wget" ]
 then
-  wget -q -O /tmp/s6-overlay.tar.gz -q https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz
+  wget -q -O /tmp/s6-overlay.tar.gz https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz
+  if [ $VERIFY -eq 1 ]
+  then
+    wget -q -O /tmp/s6-overlay.key https://keybase.io/justcontainers/key.asc
+    wget -q -O /tmp/s6-overlay.tar.gz.sig https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz.sig
+  fi
 else
   echo "ERROR: could not determine downloader!"
   exit 1
+fi
+
+# Verify the download
+if [ $VERIFY -eq 1 ]
+then
+  cat /tmp/s6-overlay.key | gpg --import
+  gpg --verify /tmp/s6-overlay.tar.gz.sig /tmp/s6-overlay.tar.gz
+  if [ $? -eq 0 ]
+  then
+    echo "s6-overlay.tar.gz verified ok!"
+  else
+    echo "ERROR: s6-overlay.tar.gz did not verify ok."
+    exit 1
+  fi
 fi
 
 # Install s6-overlay
@@ -80,4 +117,10 @@ tar -xzf /tmp/s6-overlay.tar.gz -C /
 # Clean up
 echo "Cleaning up temp file"
 rm /tmp/s6-overlay.tar.gz
+if [ $VERIFY -eq 1 ]
+then
+  rm /tmp/s6-overlay.key /tmp/s6-overlay.tar.gz.sig
+fi
+
+echo "s6-overlay deployment finished ok!"
 

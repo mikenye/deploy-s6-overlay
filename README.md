@@ -28,6 +28,23 @@ ENTRYPOINT [ "/init" ]
 
 ...in order for s6 to be initialised during container start.
 
+## GPG Verification
+
+The script supports using gpg to verify the s6-overlay download. Users of this script are strongly encouraged to make gpg available so this can take place.
+
+An example is as follows:
+
+```
+FROM alpine:3.11
+RUN ...
+    apk add --no-cache gnupg && \
+    wget -q -O - https://raw.githubusercontent.com/mikenye/deploy-s6-overlay/master/deploy-s6-overlay.sh | sh && \
+    apk del --no-cache gnupg && \
+    ...
+```
+
+In the example above, `gnupg` (and its dependencies) are added and removed in the same layer, allowing GPG verification to occur with minimal overhead.
+
 ## Testing
 
 This script has been tested on the following architectures/distributions:

@@ -4,7 +4,22 @@ FROM alpine:3.8 AS alpine_tester
 COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
 RUN /src/deploy-s6-overlay.sh
 
+FROM alpine:3.8 AS alpine_tester
+COPY --from=0 /init /tmp/init-prev
+COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
+RUN apk update && apk add gnupg && /src/deploy-s6-overlay.sh
+
 FROM alpine:3.9 AS alpine_tester
+COPY --from=0 /init /tmp/init-prev
+COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
+RUN /src/deploy-s6-overlay.sh
+
+FROM alpine:3.9 AS alpine_tester
+COPY --from=0 /init /tmp/init-prev
+COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
+RUN apk update && apk add gnupg && /src/deploy-s6-overlay.sh
+
+FROM alpine:3.10 AS alpine_tester
 COPY --from=0 /init /tmp/init-prev
 COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
 RUN /src/deploy-s6-overlay.sh
@@ -12,9 +27,19 @@ RUN /src/deploy-s6-overlay.sh
 FROM alpine:3.10 AS alpine_tester
 COPY --from=0 /init /tmp/init-prev
 COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
+RUN apk update && apk add gnupg && /src/deploy-s6-overlay.sh
+
+FROM alpine:3.11 AS alpine_tester
+COPY --from=0 /init /tmp/init-prev
+COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
 RUN /src/deploy-s6-overlay.sh
 
 FROM alpine:3.11 AS alpine_tester
+COPY --from=0 /init /tmp/init-prev
+COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
+RUN apk update && apk add gnupg && /src/deploy-s6-overlay.sh
+
+FROM alpine:latest AS alpine_tester
 COPY --from=0 /init /tmp/init-prev
 COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
 RUN /src/deploy-s6-overlay.sh
@@ -22,5 +47,5 @@ RUN /src/deploy-s6-overlay.sh
 FROM alpine:latest AS alpine_tester
 COPY --from=0 /init /tmp/init-prev
 COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
-RUN /src/deploy-s6-overlay.sh
+RUN apk update && apk add gnupg && /src/deploy-s6-overlay.sh
 
