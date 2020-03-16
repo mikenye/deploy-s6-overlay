@@ -8,13 +8,13 @@ Prevents the need for per-architecture Dockerfiles.
 
 In your project's `Dockerfile`, add one of the following commands early on within a `RUN` instruction:
 
-```
+```bash
 curl -s https://raw.githubusercontent.com/mikenye/deploy-s6-overlay/master/deploy-s6-overlay.sh | sh
 ```
 
 or:
 
-```
+```bash
 wget -q -O - https://raw.githubusercontent.com/mikenye/deploy-s6-overlay/master/deploy-s6-overlay.sh | sh
 ```
 
@@ -22,7 +22,7 @@ Both of the above methods achieve the same thing.
 
 At the end of the `Dockerfile`, you'll also need to include:
 
-```
+```dockerfile
 ENTRYPOINT [ "/init" ]
 ```
 
@@ -34,7 +34,8 @@ The script supports using gpg to verify the s6-overlay download. Users of this s
 
 An example is as follows:
 
-```
+### Example for `alpine`
+```dockerfile
 ...
 FROM alpine:3.11
 RUN ...
@@ -46,15 +47,27 @@ ENTRYPOINT [ "/init" ]
 ...
 ```
 
-In the example above, `gnupg` (and its dependencies) are added and removed in the same layer, allowing GPG verification to occur with minimal overhead.
+### Example for `debian:stable-slim`
+```dockerfile
+...
+FROM debian:stable-slim
+RUN ...
+    apt-get install --no-install-recommends -y \
+        curl \
+        gnupg \
+        ca-certificates && \
+    wget -q -O - https://raw.githubusercontent.com/mikenye/deploy-s6-overlay/master/deploy-s6-overlay.sh | sh && \
+    apt-get remove -y \
+        curl \
+        gnupg && \
+    apt-get autoremove -y
+    ...
+ENTRYPOINT [ "/init" ]
+...
+```
+
+In the examples above, `gnupg` (and its dependencies) are added and removed in the same layer, allowing GPG verification to occur with minimal overhead.
 
 ## Testing
 
-This script has been tested on the following architectures/distributions:
-
-| Distribution | `linux/amd64` | `linux/arm64` | `linux/arm/v7` | Notes |
-| ------------ |:-------------:|:-------------:|:--------------:| ----- |
-| alpine:3.8 | ✅  | ✅  | ✅  | |
-| alpine:3.9 | ✅ | ✅ | ✅ | |
-| alpine:3.10 | ✅ | ✅ | ✅ | |
-| alpine:3.11 | ✅ | ✅ | ✅ | |
+This script has been tested with `alpine` and `debian:stable-slim` images.
