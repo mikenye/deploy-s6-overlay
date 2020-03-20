@@ -75,18 +75,4 @@ In the examples above, `gnupg` (and its dependencies) are added and removed in t
 
 ## Testing
 
-This script has been tested on the following architectures/distributions:
-
-| Distribution | `linux/amd64` | `linux/arm64` | `linux/arm/v7` | Notes |
-| ------------ |:-------------:|:-------------:|:--------------:| ----- |
-| alpine:3.8 | ✅  | ✅  | ✅  | |
-| alpine:3.9 | ✅ | ✅ | ✅ | |
-| alpine:3.10 | ✅ | ✅ | ✅ | |
-| alpine:3.11 | ✅ | ✅ | ✅ | |
-| alpine:latest | ✅ | ✅ | ✅ | |
-| debian:bullseye-slim | ✅ | ✅ | ✅ | `curl` or `wget`, and `ca-certificates` need to be installed |
-| debian:buster-slim | ✅ | ✅ | ✅ | `curl` or `wget`, and `ca-certificates` need to be installed |
-| debian:jessie-slim | ✅ | ✅ | ✅ | `curl` or `wget`, and `ca-certificates` need to be installed |
-| debian:sid-slim | ✅ | ✅ | ✅ | `curl` or `wget`, and `ca-certificates` need to be installed |
-| debian:stretch-slim | ✅ | ✅ | ✅ | `curl` or `wget`, and `ca-certificates` need to be installed |
-| debian:stable-slim | ✅ | ✅ | ✅ | `curl` or `wget`, and `ca-certificates` need to be installed |
+This script has been tested with `alpine` and `debian:stable-slim` images.
