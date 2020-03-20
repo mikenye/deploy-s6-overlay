@@ -49,3 +49,130 @@ COPY --from=0 /init /tmp/init-prev
 COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
 RUN apk update && apk add gnupg && /src/deploy-s6-overlay.sh
 
+# Testing Debian
+
+FROM debian:bullseye-slim AS debian_tester
+COPY --from=0 /init /tmp/init-prev
+COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      ca-certificates \
+      curl \
+      && \
+    /src/deploy-s6-overlay.sh
+
+FROM debian:bullseye-slim AS debian_tester
+COPY --from=0 /init /tmp/init-prev
+COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      ca-certificates \
+      curl \
+      gnupg \
+      && \
+    /src/deploy-s6-overlay.sh
+
+FROM debian:buster-slim AS debian_tester
+COPY --from=0 /init /tmp/init-prev
+COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      ca-certificates \
+      curl \
+      && \
+    /src/deploy-s6-overlay.sh
+
+FROM debian:buster-slim AS debian_tester
+COPY --from=0 /init /tmp/init-prev
+COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      ca-certificates \
+      curl \
+      gnupg \
+      && \
+    /src/deploy-s6-overlay.sh
+
+FROM debian:jessie-slim AS debian_tester
+COPY --from=0 /init /tmp/init-prev
+COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      ca-certificates \
+      curl \
+      && \
+    /src/deploy-s6-overlay.sh
+
+FROM debian:jessie-slim AS debian_tester
+COPY --from=0 /init /tmp/init-prev
+COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      ca-certificates \
+      curl \
+      gnupg \
+      && \
+    /src/deploy-s6-overlay.sh
+
+FROM debian:sid-slim AS debian_tester
+COPY --from=0 /init /tmp/init-prev
+COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      ca-certificates \
+      curl \
+      && \
+    /src/deploy-s6-overlay.sh
+
+FROM debian:sid-slim AS debian_tester
+COPY --from=0 /init /tmp/init-prev
+COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      ca-certificates \
+      curl \
+      gnupg \
+      && \
+    /src/deploy-s6-overlay.sh
+
+FROM debian:stretch-slim AS debian_tester
+COPY --from=0 /init /tmp/init-prev
+COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      ca-certificates \
+      curl \
+      && \
+    /src/deploy-s6-overlay.sh
+
+FROM debian:stretch-slim AS debian_tester
+COPY --from=0 /init /tmp/init-prev
+COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      ca-certificates \
+      curl \
+      gnupg \
+      && \
+    /src/deploy-s6-overlay.sh
+
+FROM debian:stable-slim AS debian_tester
+COPY --from=0 /init /tmp/init-prev
+COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      ca-certificates \
+      curl \
+      && \
+    /src/deploy-s6-overlay.sh
+
+FROM debian:stable-slim AS debian_tester
+COPY --from=0 /init /tmp/init-prev
+COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
+RUN apt-get update && \
+    apt-get install -y \
+      ca-certificates \
+      curl \
+      gnupg \
+      && \
+    /src/deploy-s6-overlay.sh

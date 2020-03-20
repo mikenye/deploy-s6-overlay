@@ -1,10 +1,11 @@
-#!/bin/sh
+#!/usr/bin/env sh
+#shellcheck shell=sh
 
 echo "s6-overlay deployment started."
 
 # Determine which downloader to use
 # Check if curl is available
-CURLBINARY=`which curl`
+which curl > /dev/null 2>&1
 if [ $? -eq 0 ]
 then
   echo "cURL available, using"
@@ -12,7 +13,7 @@ then
 else
   echo "cURL not available"
   # If no curl available, check if wget is available
-  WGETBINARY=`which wget`
+  which wget > /dev/null 2>&1
   if [ $? -eq 0 ]
   then
     echo "wget available, using"
@@ -26,7 +27,7 @@ else
 fi
 
 # Determine if gpg is available to verify our download
-GPGBINARY=`which gpg`
+which gpg > /dev/null 2>&1
 if [ $? -eq 0 ]
 then
   echo "gpg available, will verify s6-overlay download"
@@ -41,10 +42,10 @@ if [ -z "${S6OVERLAY_VERSION}" ]; then
   # Determine which version of s6 overlay to use
   if [ "$DOWNLOADER" = "curl" ]
   then
-    S6OVERLAY_VERSION=`curl -s https://api.github.com/repos/just-containers/s6-overlay/releases/latest | grep '"name"' | head -1 | cut -d ":" -f 2 | tr -d " " | tr -d '"' | tr -d ","`
+    S6OVERLAY_VERSION=$(curl -s https://api.github.com/repos/just-containers/s6-overlay/releases/latest | grep '"name"' | head -1 | cut -d ":" -f 2 | tr -d " " | tr -d '"' | tr -d ",")
   elif [ "$DOWNLOADER" = "wget" ]
   then
-    S6OVERLAY_VERSION=`wget -O - -q https://api.github.com/repos/just-containers/s6-overlay/releases/latest | grep '"name"' | head -1 | cut -d ":" -f 2 | tr -d " " | tr -d '"' | tr -d ","`
+    S6OVERLAY_VERSION=$(wget -O - -q https://api.github.com/repos/just-containers/s6-overlay/releases/latest | grep '"name"' | head -1 | cut -d ":" -f 2 | tr -d " " | tr -d '"' | tr -d ",")
   else
     echo "ERROR: could not determine downloader!"
     exit 1
@@ -54,8 +55,8 @@ fi
 # If S6 architecture not specified...
 if [ -z "${S6OVERLAY_ARCH}" ]; then
   # Use the architecture of the build platform
-  ARCH=`uname -m`
-  
+  ARCH=$(uname -m)
+
   # Make architecture names match s6 overlay architecture names
   if [ ${ARCH} = "aarch64" ]; then
     S6OVERLAY_ARCH="aarch64"
@@ -68,7 +69,7 @@ if [ -z "${S6OVERLAY_ARCH}" ]; then
     exit 1
   fi
 fi
-  
+
 echo "Will deploy s6-overlay version ${S6OVERLAY_VERSION} for architecture ${S6OVERLAY_ARCH}"
 
 # Download S6 Overlay
@@ -80,7 +81,7 @@ then
   curl -s --location --output /tmp/s6-overlay.tar.gz https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz
   if [ $VERIFY -eq 1 ]
   then
-    curl -s --location --output /tmp/s6-overlay.key https://keybase.io/justcontainers/key.asc
+    curl -s --location https://keybase.io/justcontainers/key.asc | gpg --import
     curl -s --location --output /tmp/s6-overlay.tar.gz.sig https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz.sig
   fi
 elif [ "$DOWNLOADER" = "wget" ]
@@ -88,7 +89,7 @@ then
   wget -q -O /tmp/s6-overlay.tar.gz https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz
   if [ $VERIFY -eq 1 ]
   then
-    wget -q -O /tmp/s6-overlay.key https://keybase.io/justcontainers/key.asc
+    wget -q -O - https://keybase.io/justcontainers/key.asc | gpg --import
     wget -q -O /tmp/s6-overlay.tar.gz.sig https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz.sig
   fi
 else
@@ -99,7 +100,7 @@ fi
 # Verify the download
 if [ $VERIFY -eq 1 ]
 then
-  cat /tmp/s6-overlay.key | gpg --import
+  #cat /tmp/s6-overlay.key | gpg --import
   gpg --verify /tmp/s6-overlay.tar.gz.sig /tmp/s6-overlay.tar.gz
   if [ $? -eq 0 ]
   then
@@ -119,8 +120,7 @@ echo "Cleaning up temp file"
 rm /tmp/s6-overlay.tar.gz
 if [ $VERIFY -eq 1 ]
 then
-  rm /tmp/s6-overlay.key /tmp/s6-overlay.tar.gz.sig
+  rm /tmp/s6-overlay.tar.gz.sig
 fi
 
 echo "s6-overlay deployment finished ok!"
-
