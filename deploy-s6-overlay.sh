@@ -61,7 +61,35 @@ if [ -z "${S6OVERLAY_ARCH}" ]; then
   if [ ${ARCH} = "aarch64" ]; then
     S6OVERLAY_ARCH="aarch64"
   elif [ ${ARCH} = "x86_64" ]; then
-    S6OVERLAY_ARCH="amd64"
+
+    # If cross-building for 32-bit, we have no way to determine this without looking at the installed binaries using libmagic/file
+    # Do we have libmagic/file installed
+    FILEBINARY=$(which file)
+    if [ $? -eq 0 ]; then
+
+      # if so, check platform that /bin/cp is compiled for
+
+      # 80386 = x86
+      $FILEBINARY -L /bin/cp | grep 80386
+      if [ $? -eq 0 ]; then
+        S6OVERLAY_ARCH="x86"
+      fi
+
+      # x86-64 = amd64
+      $FILEBINARY -L /bin/cp | grep x86-64
+      if [ $? -eq 0 ]; then
+        S6OVERLAY_ARCH="amd64"
+      fi
+
+    else
+
+      # if not, then warn that we can't detect (and thus may have incorrect s6-overlay architecture if cross-building)
+
+      echo "WARNING: 'file' utility not available, cannot detect if cross-building!"
+      S6OVERLAY_ARCH="amd64"
+      
+    fi
+
   elif [ ${ARCH} = "armv7l" ]; then
     S6OVERLAY_ARCH="armhf"
   else
