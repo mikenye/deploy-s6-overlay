@@ -11,7 +11,7 @@ RUN apk update && \
 
 # Testing Debian
 FROM debian:stable-slim AS debian_tester
-COPY --from=0 /init /tmp/init-prev
+COPY --from=0 /bin/cp /tmp/_deleteme
 COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
 RUN apt-get update && \
     apt-get install -y \
