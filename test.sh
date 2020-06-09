@@ -21,7 +21,4 @@ docker buildx build --no-cache --progress plain -f Dockerfile.testing --platform
 echo "========== Testing linux/amd/v6 distros =========="
 docker buildx build --no-cache --progress plain -f Dockerfile.testing --platform linux/arm/v6 . || exit 1
 
-echo "========== Testing linux/amd/v5 distros =========="
-docker buildx build --no-cache --progress plain -f Dockerfile.testing --platform linux/arm/v5 . || exit 1
-
 echo "========== COMPLETED! =========="
