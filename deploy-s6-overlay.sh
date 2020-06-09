@@ -187,6 +187,14 @@ fi
 echo "Unpacking s6-overlay"
 tar -xzf /tmp/s6-overlay.tar.gz -C /
 
+# Test
+echo "Testing s6-overlay"
+/bin/s6-clock > /dev/null || exit 1
+/bin/s6-echo > /dev/null || exit 1
+/bin/s6-hostname > /dev/null || exit 1
+/bin/s6-ls / > /dev/null || exit 1
+/bin/s6-ps > /dev/null || exit 1
+
 # Clean up
 echo "Cleaning up temp file"
 rm /tmp/s6-overlay.tar.gz
