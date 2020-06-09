@@ -54,20 +54,92 @@ fi
 
 # If S6 architecture not specified...
 if [ -z "${S6OVERLAY_ARCH}" ]; then
-  # Use the architecture of the build platform
-  ARCH=$(uname -m)
 
-  # Make architecture names match s6 overlay architecture names
-  if [ ${ARCH} = "aarch64" ]; then
-    S6OVERLAY_ARCH="aarch64"
-  elif [ ${ARCH} = "x86_64" ]; then
-    S6OVERLAY_ARCH="amd64"
-  elif [ ${ARCH} = "armv7l" ]; then
-    S6OVERLAY_ARCH="armhf"
-  else
-    echo "Unknown architecture"
+  #-----
+  #
+  # This old method of using `uname -m` has been abandoned.
+  # If cross-building (ie: building for i386 on amd64),
+  # You'd get the wrong architecture, as `uname -m` would return amd64.
+
+  # # Use the architecture of the build platform
+  # ARCH=$(uname -m)
+
+  # # Make architecture names match s6 overlay architecture names
+  # if [ ${ARCH} = "aarch64" ]; then
+  #   S6OVERLAY_ARCH="aarch64"
+  # elif [ ${ARCH} = "x86_64" ]; then
+  #   S6OVERLAY_ARCH="amd64"
+  # elif [ ${ARCH} = "armv7l" ]; then
+  #   S6OVERLAY_ARCH="armhf"
+  # else
+  #   echo "Unknown architecture"
+  #   exit 1
+  # fi
+  #
+  #-----
+
+  # If cross-building for 32-bit, we have no way to determine this without looking at the installed binaries using libmagic/file
+  # Do we have libmagic/file installed
+  
+  # Make sure `file` (libmagic) is available
+  FILEBINARY=$(which file)
+  if [ $? -ne 0 ]; then
+    echo "ERROR: 'file' (libmagic) not available, cannot detect architecture!"
     exit 1
   fi
+  FILEOUTPUT=$("${FILEBINARY}" -L "${FILEBINARY}")
+
+  # 32-bit x86
+  # Example output:
+  # /usr/bin/file: ELF 32-bit LSB shared object, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-musl-i386.so.1, stripped
+  # /usr/bin/file: ELF 32-bit LSB shared object, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 3.2.0, BuildID[sha1]=d48e1d621e9b833b5d33ede3b4673535df181fe0, stripped  
+  echo ${FILEOUTPUT} | grep "Intel 80386" > /dev/null
+  if [ $? -eq 0 ]; then
+    S6OVERLAY_ARCH="x86"
+  fi
+
+  # x86-64
+  # Example output:
+  # /usr/bin/file: ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib/ld-musl-x86_64.so.1, stripped
+  # /usr/bin/file: ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0, BuildID[sha1]=6b0b86f64e36f977d088b3e7046f70a586dd60e7, stripped
+  echo ${FILEOUTPUT} | grep "x86-64" > /dev/null
+  if [ $? -eq 0 ]; then
+    S6OVERLAY_ARCH="amd64"
+  fi
+
+  # armel
+  # /usr/bin/file: ELF 32-bit LSB shared object, ARM, EABI5 version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.3, for GNU/Linux 3.2.0, BuildID[sha1]=f57b617d0d6cd9d483dcf847b03614809e5cd8a9, stripped
+  echo ${FILEOUTPUT} | grep "ARM" > /dev/null
+  if [ $? -eq 0 ]; then
+
+    S6OVERLAY_ARCH="arm"
+
+    # armhf
+    # Example outputs:
+    # /usr/bin/file: ELF 32-bit LSB shared object, ARM, EABI5 version 1 (SYSV), dynamically linked, interpreter /lib/ld-musl-armhf.so.1, stripped  # /usr/bin/file: ELF 32-bit LSB shared object, ARM, EABI5 version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux-armhf.so.3, for GNU/Linux 3.2.0, BuildID[sha1]=921490a07eade98430e10735d69858e714113c56, stripped
+    # /usr/bin/file: ELF 32-bit LSB shared object, ARM, EABI5 version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux-armhf.so.3, for GNU/Linux 3.2.0, BuildID[sha1]=921490a07eade98430e10735d69858e714113c56, stripped
+    echo ${FILEOUTPUT} | grep "armhf" > /dev/null
+    if [ $? -eq 0 ]; then
+      S6OVERLAY_ARCH="armhf"
+    fi
+
+    # arm64
+    # Example output:
+    # /usr/bin/file: ELF 64-bit LSB shared object, ARM aarch64, version 1 (SYSV), dynamically linked, interpreter /lib/ld-musl-aarch64.so.1, stripped
+    # /usr/bin/file: ELF 64-bit LSB shared object, ARM aarch64, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux-aarch64.so.1, for GNU/Linux 3.7.0, BuildID[sha1]=a8d6092fd49d8ec9e367ac9d451b3f55c7ae7a78, stripped
+    echo ${FILEOUTPUT} | grep "aarch64" > /dev/null
+    if [ $? -eq 0 ]; then
+      S6OVERLAY_ARCH="aarch64"
+    fi
+
+  fi
+
+fi
+
+# If we don't have an architecture at this point, there's been a problem and we can't continue
+if [ -z "${S6OVERLAY_ARCH}" ]; then
+  echo "ERROR: Unable to determine architecture or unsupported architecture!"
+  exit 1
 fi
 
 echo "Will deploy s6-overlay version ${S6OVERLAY_VERSION} for architecture ${S6OVERLAY_ARCH}"
@@ -114,6 +186,14 @@ fi
 # Install s6-overlay
 echo "Unpacking s6-overlay"
 tar -xzf /tmp/s6-overlay.tar.gz -C /
+
+# Test
+echo "Testing s6-overlay"
+/bin/s6-clock > /dev/null || exit 1
+/bin/s6-echo > /dev/null || exit 1
+/bin/s6-hostname > /dev/null || exit 1
+/bin/s6-ls / > /dev/null || exit 1
+/bin/s6-ps > /dev/null || exit 1
 
 # Clean up
 echo "Cleaning up temp file"
