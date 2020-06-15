@@ -78,7 +78,7 @@ if [ -z "${S6OVERLAY_ARCH}" ]; then
   #
   #-----
 
-  # If cross-building for 32-bit, we have no way to determine this without looking at the installed binaries using libmagic/file
+  # If cross-building, we have no way to determine this without looking at the installed binaries using libmagic/file
   # Do we have libmagic/file installed
   
   # Make sure `file` (libmagic) is available
