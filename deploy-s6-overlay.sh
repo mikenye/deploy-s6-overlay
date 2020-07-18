@@ -5,17 +5,13 @@ echo "s6-overlay deployment started."
 
 # Determine which downloader to use
 # Check if curl is available
-which curl > /dev/null 2>&1
-if [ $? -eq 0 ]
-then
+if which curl > /dev/null 2>&1; then
   echo "cURL available, using"
   DOWNLOADER=curl
 else
   echo "cURL not available"
   # If no curl available, check if wget is available
-  which wget > /dev/null 2>&1
-  if [ $? -eq 0 ]
-  then
+  if which wget > /dev/null 2>&1; then
     echo "wget available, using"
     DOWNLOADER=wget
   else
@@ -27,9 +23,7 @@ else
 fi
 
 # Determine if gpg is available to verify our download
-which gpg > /dev/null 2>&1
-if [ $? -eq 0 ]
-then
+if which gpg > /dev/null 2>&1; then
   echo "gpg available, will verify s6-overlay download"
   VERIFY=1
 else
@@ -82,8 +76,7 @@ if [ -z "${S6OVERLAY_ARCH}" ]; then
   # Do we have libmagic/file installed
   
   # Make sure `file` (libmagic) is available
-  FILEBINARY=$(which file)
-  if [ $? -ne 0 ]; then
+  if FILEBINARY=$(which file); then
     echo "ERROR: 'file' (libmagic) not available, cannot detect architecture!"
     exit 1
   fi
