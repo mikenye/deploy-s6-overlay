@@ -173,8 +173,7 @@ fi
 if [ $VERIFY -eq 1 ]
 then
   #cat /tmp/s6-overlay.key | gpg --import
-  gpg --verify /tmp/s6-overlay.tar.gz.sig /tmp/s6-overlay.tar.gz
-  if [ $? -eq 0 ]
+  if gpg --verify /tmp/s6-overlay.tar.gz.sig /tmp/s6-overlay.tar.gz;
   then
     echo "s6-overlay.tar.gz verified ok!"
   else
