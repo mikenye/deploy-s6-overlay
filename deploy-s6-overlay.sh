@@ -5,17 +5,13 @@ echo "s6-overlay deployment started."
 
 # Determine which downloader to use
 # Check if curl is available
-which curl > /dev/null 2>&1
-if [ $? -eq 0 ]
-then
+if which curl > /dev/null 2>&1; then
   echo "cURL available, using"
   DOWNLOADER=curl
 else
   echo "cURL not available"
   # If no curl available, check if wget is available
-  which wget > /dev/null 2>&1
-  if [ $? -eq 0 ]
-  then
+  if which wget > /dev/null 2>&1; then
     echo "wget available, using"
     DOWNLOADER=wget
   else
@@ -27,9 +23,7 @@ else
 fi
 
 # Determine if gpg is available to verify our download
-which gpg > /dev/null 2>&1
-if [ $? -eq 0 ]
-then
+if which gpg > /dev/null 2>&1; then
   echo "gpg available, will verify s6-overlay download"
   VERIFY=1
 else
@@ -78,12 +72,12 @@ if [ -z "${S6OVERLAY_ARCH}" ]; then
   #
   #-----
 
-  # If cross-building for 32-bit, we have no way to determine this without looking at the installed binaries using libmagic/file
+  # If cross-building, we have no way to determine this without looking at the installed binaries using libmagic/file
   # Do we have libmagic/file installed
   
   # Make sure `file` (libmagic) is available
   FILEBINARY=$(which file)
-  if [ $? -ne 0 ]; then
+  if [ -z "$FILEBINARY" ]; then
     echo "ERROR: 'file' (libmagic) not available, cannot detect architecture!"
     exit 1
   fi
@@ -93,8 +87,7 @@ if [ -z "${S6OVERLAY_ARCH}" ]; then
   # Example output:
   # /usr/bin/file: ELF 32-bit LSB shared object, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-musl-i386.so.1, stripped
   # /usr/bin/file: ELF 32-bit LSB shared object, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 3.2.0, BuildID[sha1]=d48e1d621e9b833b5d33ede3b4673535df181fe0, stripped  
-  echo ${FILEOUTPUT} | grep "Intel 80386" > /dev/null
-  if [ $? -eq 0 ]; then
+  if echo "${FILEOUTPUT}" | grep "Intel 80386" > /dev/null; then
     S6OVERLAY_ARCH="x86"
   fi
 
@@ -102,15 +95,13 @@ if [ -z "${S6OVERLAY_ARCH}" ]; then
   # Example output:
   # /usr/bin/file: ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib/ld-musl-x86_64.so.1, stripped
   # /usr/bin/file: ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0, BuildID[sha1]=6b0b86f64e36f977d088b3e7046f70a586dd60e7, stripped
-  echo ${FILEOUTPUT} | grep "x86-64" > /dev/null
-  if [ $? -eq 0 ]; then
+  if echo "${FILEOUTPUT}" | grep "x86-64" > /dev/null; then
     S6OVERLAY_ARCH="amd64"
   fi
 
   # armel
   # /usr/bin/file: ELF 32-bit LSB shared object, ARM, EABI5 version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.3, for GNU/Linux 3.2.0, BuildID[sha1]=f57b617d0d6cd9d483dcf847b03614809e5cd8a9, stripped
-  echo ${FILEOUTPUT} | grep "ARM" > /dev/null
-  if [ $? -eq 0 ]; then
+  if echo "${FILEOUTPUT}" | grep "ARM" > /dev/null; then
 
     S6OVERLAY_ARCH="arm"
 
@@ -118,8 +109,7 @@ if [ -z "${S6OVERLAY_ARCH}" ]; then
     # Example outputs:
     # /usr/bin/file: ELF 32-bit LSB shared object, ARM, EABI5 version 1 (SYSV), dynamically linked, interpreter /lib/ld-musl-armhf.so.1, stripped  # /usr/bin/file: ELF 32-bit LSB shared object, ARM, EABI5 version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux-armhf.so.3, for GNU/Linux 3.2.0, BuildID[sha1]=921490a07eade98430e10735d69858e714113c56, stripped
     # /usr/bin/file: ELF 32-bit LSB shared object, ARM, EABI5 version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux-armhf.so.3, for GNU/Linux 3.2.0, BuildID[sha1]=921490a07eade98430e10735d69858e714113c56, stripped
-    echo ${FILEOUTPUT} | grep "armhf" > /dev/null
-    if [ $? -eq 0 ]; then
+    if echo "${FILEOUTPUT}" | grep "armhf" > /dev/null; then
       S6OVERLAY_ARCH="armhf"
     fi
 
@@ -127,8 +117,7 @@ if [ -z "${S6OVERLAY_ARCH}" ]; then
     # Example output:
     # /usr/bin/file: ELF 64-bit LSB shared object, ARM aarch64, version 1 (SYSV), dynamically linked, interpreter /lib/ld-musl-aarch64.so.1, stripped
     # /usr/bin/file: ELF 64-bit LSB shared object, ARM aarch64, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux-aarch64.so.1, for GNU/Linux 3.7.0, BuildID[sha1]=a8d6092fd49d8ec9e367ac9d451b3f55c7ae7a78, stripped
-    echo ${FILEOUTPUT} | grep "aarch64" > /dev/null
-    if [ $? -eq 0 ]; then
+    if echo "${FILEOUTPUT}" | grep "aarch64" > /dev/null; then
       S6OVERLAY_ARCH="aarch64"
     fi
 
@@ -150,19 +139,19 @@ echo "Getting s6-overlay from: https://github.com/just-containers/s6-overlay/rel
 # Determine which version of s6 overlay to use
 if [ "$DOWNLOADER" = "curl" ]
 then
-  curl -s --location --output /tmp/s6-overlay.tar.gz https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz
+  curl -s --location --output /tmp/s6-overlay.tar.gz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz"
   if [ $VERIFY -eq 1 ]
   then
     curl -s --location https://keybase.io/justcontainers/key.asc | gpg --import
-    curl -s --location --output /tmp/s6-overlay.tar.gz.sig https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz.sig
+    curl -s --location --output /tmp/s6-overlay.tar.gz.sig "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz.sig"
   fi
 elif [ "$DOWNLOADER" = "wget" ]
 then
-  wget -q -O /tmp/s6-overlay.tar.gz https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz
+  wget -q -O /tmp/s6-overlay.tar.gz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz"
   if [ $VERIFY -eq 1 ]
   then
     wget -q -O - https://keybase.io/justcontainers/key.asc | gpg --import
-    wget -q -O /tmp/s6-overlay.tar.gz.sig https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz.sig
+    wget -q -O /tmp/s6-overlay.tar.gz.sig "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz.sig"
   fi
 else
   echo "ERROR: could not determine downloader!"
@@ -173,8 +162,7 @@ fi
 if [ $VERIFY -eq 1 ]
 then
   #cat /tmp/s6-overlay.key | gpg --import
-  gpg --verify /tmp/s6-overlay.tar.gz.sig /tmp/s6-overlay.tar.gz
-  if [ $? -eq 0 ]
+  if gpg --verify /tmp/s6-overlay.tar.gz.sig /tmp/s6-overlay.tar.gz;
   then
     echo "s6-overlay.tar.gz verified ok!"
   else
