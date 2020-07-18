@@ -76,7 +76,8 @@ if [ -z "${S6OVERLAY_ARCH}" ]; then
   # Do we have libmagic/file installed
   
   # Make sure `file` (libmagic) is available
-  if FILEBINARY=$(which file); then
+  FILEBINARY=$(which file)
+  if [ -z "$FILEBINARY" ]; then
     echo "ERROR: 'file' (libmagic) not available, cannot detect architecture!"
     exit 1
   fi
