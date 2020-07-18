@@ -10,7 +10,7 @@ Prevents the need for per-architecture Dockerfiles, and allows all s6-overlay de
 - [`gnupg or gnupg2`](https://www.gnupg.org)
 - [`curl`](https://curl.haxx.se) or [`wget`](https://www.gnu.org/software/wget/) (and also `ca-certificates` if not installed already)
 
-## How it works ##
+## How it works
 
 Originally the script would use `uname -m` to determine the container architecture, however this method has been abandoned. If cross-building (ie: building for i386 on amd64), you'd get the wrong architecture, as `uname -m` would return amd64.
 
@@ -20,7 +20,7 @@ The pre-requisites (`file`, `gnupg`/`gnupg2`, `curl`/`wget`) can be installed an
 
 The script also includes testing to make sure the binaries run properly after installation. If there are any problems, the image will exit abnormally, which should cause the `docker build` process to fail (instead of returning a non-working image).
 
-### Architecture examples ###
+### Architecture examples
 
 #### x86
 
