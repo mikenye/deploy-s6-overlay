@@ -1,11 +1,11 @@
 # Testing alpine:
 FROM alpine:latest AS alpine_tester
 COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
-RUN apk update 2>&1 > /dev/null && \
+RUN apk update > /dev/null 2>&1 && \
     apk add \
       file \
       gnupg \
-      2>&1 > /dev/null && \
+      /dev/null 2>&1 > && \
     file $(which file) && \
     /src/deploy-s6-overlay.sh
 
@@ -13,12 +13,12 @@ RUN apk update 2>&1 > /dev/null && \
 FROM debian:stable-slim AS debian_tester
 COPY --from=0 /bin/cp /tmp/_deleteme
 COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
-RUN apt-get update 2>&1 > /dev/null && \
+RUN apt-get update > /dev/null 2>&1 && \
     apt-get install -y \
       ca-certificates \
       curl \
       file \
       gnupg \
-      2>&1 > /dev/null && \
+      > /dev/null 2>&1 && \
     file $(which file) && \
     /src/deploy-s6-overlay.sh
