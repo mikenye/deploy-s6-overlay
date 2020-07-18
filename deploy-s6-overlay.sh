@@ -150,19 +150,19 @@ echo "Getting s6-overlay from: https://github.com/just-containers/s6-overlay/rel
 # Determine which version of s6 overlay to use
 if [ "$DOWNLOADER" = "curl" ]
 then
-  curl -s --location --output /tmp/s6-overlay.tar.gz https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz
+  curl -s --location --output /tmp/s6-overlay.tar.gz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz"
   if [ $VERIFY -eq 1 ]
   then
     curl -s --location https://keybase.io/justcontainers/key.asc | gpg --import
-    curl -s --location --output /tmp/s6-overlay.tar.gz.sig https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz.sig
+    curl -s --location --output /tmp/s6-overlay.tar.gz.sig "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz.sig"
   fi
 elif [ "$DOWNLOADER" = "wget" ]
 then
-  wget -q -O /tmp/s6-overlay.tar.gz https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz
+  wget -q -O /tmp/s6-overlay.tar.gz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz"
   if [ $VERIFY -eq 1 ]
   then
     wget -q -O - https://keybase.io/justcontainers/key.asc | gpg --import
-    wget -q -O /tmp/s6-overlay.tar.gz.sig https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz.sig
+    wget -q -O /tmp/s6-overlay.tar.gz.sig "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz.sig"
   fi
 else
   echo "ERROR: could not determine downloader!"
