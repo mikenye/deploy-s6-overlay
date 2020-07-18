@@ -169,9 +169,9 @@ if [ $VERIFY -eq 1 ]; then
   #cat /tmp/s6-overlay.key | gpg --import
   if gpg --verify /tmp/s6-overlay.tar.gz.sig /tmp/s6-overlay.tar.gz;
   then
-    echo "[$0] s6-overlay.tar.gz verified ok!"
+    echo "[$0] s6-overlay.tar.gz verified ok"
   else
-    echo "[$0] ERROR: s6-overlay.tar.gz did not verify ok."
+    echo "[$0] ERROR: s6-overlay.tar.gz did not verify ok"
     exit 1
   fi
 fi
@@ -196,4 +196,4 @@ then
   rm /tmp/s6-overlay.tar.gz.sig
 fi
 
-echo "[$0] s6-overlay deployment finished ok!"
+echo "[$0] s6-overlay deployment finished ok"
