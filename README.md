@@ -166,7 +166,6 @@ The default behaviour of the script can be overridden through the use of environ
 | `S6OVERLAY_ARCH` | If set, overrides architecture detection and will install the architecture specified. Can be set to one of the following: `aarch64`, `amd64`, `arm`, `armhf`, `ppc64le`, `x86`. |
 | `S6OVERLAY_VERSION` | If set, will install a specific release of s6-overlay (instead of the latest stable). See [here](https://github.com/just-containers/s6-overlay/releases) for a list of releases.
 
-
 ## Testing
 
 This script has been tested with `alpine` and `debian:stable-slim` images on all supported architectures.
