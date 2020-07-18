@@ -6,7 +6,7 @@ RUN apk update > /dev/null 2>&1 && \
       file \
       gnupg \
       > /dev/null 2>&1 && \
-    file $(which file) && \
+    file "$(which file)" && \
     /src/deploy-s6-overlay.sh
 
 # Testing Debian
@@ -20,5 +20,5 @@ RUN apt-get update > /dev/null 2>&1 && \
       file \
       gnupg \
       > /dev/null 2>&1 && \
-    file $(which file) && \
+    file "$(which file)" && \
     /src/deploy-s6-overlay.sh
