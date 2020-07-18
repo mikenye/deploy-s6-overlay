@@ -93,7 +93,7 @@ if [ -z "${S6OVERLAY_ARCH}" ]; then
   # Example output:
   # /usr/bin/file: ELF 32-bit LSB shared object, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-musl-i386.so.1, stripped
   # /usr/bin/file: ELF 32-bit LSB shared object, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 3.2.0, BuildID[sha1]=d48e1d621e9b833b5d33ede3b4673535df181fe0, stripped  
-  echo ${FILEOUTPUT} | grep "Intel 80386" > /dev/null
+  echo "${FILEOUTPUT}" | grep "Intel 80386" > /dev/null
   if [ $? -eq 0 ]; then
     S6OVERLAY_ARCH="x86"
   fi
@@ -102,14 +102,14 @@ if [ -z "${S6OVERLAY_ARCH}" ]; then
   # Example output:
   # /usr/bin/file: ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib/ld-musl-x86_64.so.1, stripped
   # /usr/bin/file: ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0, BuildID[sha1]=6b0b86f64e36f977d088b3e7046f70a586dd60e7, stripped
-  echo ${FILEOUTPUT} | grep "x86-64" > /dev/null
+  echo "${FILEOUTPUT}" | grep "x86-64" > /dev/null
   if [ $? -eq 0 ]; then
     S6OVERLAY_ARCH="amd64"
   fi
 
   # armel
   # /usr/bin/file: ELF 32-bit LSB shared object, ARM, EABI5 version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.3, for GNU/Linux 3.2.0, BuildID[sha1]=f57b617d0d6cd9d483dcf847b03614809e5cd8a9, stripped
-  echo ${FILEOUTPUT} | grep "ARM" > /dev/null
+  echo "${FILEOUTPUT}" | grep "ARM" > /dev/null
   if [ $? -eq 0 ]; then
 
     S6OVERLAY_ARCH="arm"
@@ -118,7 +118,7 @@ if [ -z "${S6OVERLAY_ARCH}" ]; then
     # Example outputs:
     # /usr/bin/file: ELF 32-bit LSB shared object, ARM, EABI5 version 1 (SYSV), dynamically linked, interpreter /lib/ld-musl-armhf.so.1, stripped  # /usr/bin/file: ELF 32-bit LSB shared object, ARM, EABI5 version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux-armhf.so.3, for GNU/Linux 3.2.0, BuildID[sha1]=921490a07eade98430e10735d69858e714113c56, stripped
     # /usr/bin/file: ELF 32-bit LSB shared object, ARM, EABI5 version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux-armhf.so.3, for GNU/Linux 3.2.0, BuildID[sha1]=921490a07eade98430e10735d69858e714113c56, stripped
-    echo ${FILEOUTPUT} | grep "armhf" > /dev/null
+    echo "${FILEOUTPUT}" | grep "armhf" > /dev/null
     if [ $? -eq 0 ]; then
       S6OVERLAY_ARCH="armhf"
     fi
@@ -127,7 +127,7 @@ if [ -z "${S6OVERLAY_ARCH}" ]; then
     # Example output:
     # /usr/bin/file: ELF 64-bit LSB shared object, ARM aarch64, version 1 (SYSV), dynamically linked, interpreter /lib/ld-musl-aarch64.so.1, stripped
     # /usr/bin/file: ELF 64-bit LSB shared object, ARM aarch64, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux-aarch64.so.1, for GNU/Linux 3.7.0, BuildID[sha1]=a8d6092fd49d8ec9e367ac9d451b3f55c7ae7a78, stripped
-    echo ${FILEOUTPUT} | grep "aarch64" > /dev/null
+    echo "${FILEOUTPUT}" | grep "aarch64" > /dev/null
     if [ $? -eq 0 ]; then
       S6OVERLAY_ARCH="aarch64"
     fi
