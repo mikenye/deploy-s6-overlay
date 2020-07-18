@@ -1,8 +1,7 @@
 # Testing alpine:
 FROM alpine:latest AS alpine_tester
 COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
-RUN apk update > /dev/null 2>&1 && \
-    apk add \
+RUN apk --no-cache add \
       file \
       gnupg \
       > /dev/null 2>&1 && \
