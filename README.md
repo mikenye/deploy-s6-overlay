@@ -4,13 +4,13 @@
 
 Prevents the need for per-architecture Dockerfiles, and allows all s6-overlay deployment tasks to be done within a single layer.
 
-## Prerequisites:
+## Prerequisites
 
 - [`file`](https://github.com/file/file)
 - [`gnupg or gnupg2`](https://www.gnupg.org)
 - [`curl`](https://curl.haxx.se) or [`wget`](https://www.gnu.org/software/wget/) (and also `ca-certificates` if not installed already)
 
-## How it works ##
+## How it works
 
 Originally the script would use `uname -m` to determine the container architecture, however this method has been abandoned. If cross-building (ie: building for i386 on amd64), you'd get the wrong architecture, as `uname -m` would return amd64.
 
@@ -20,7 +20,7 @@ The pre-requisites (`file`, `gnupg`/`gnupg2`, `curl`/`wget`) can be installed an
 
 The script also includes testing to make sure the binaries run properly after installation. If there are any problems, the image will exit abnormally, which should cause the `docker build` process to fail (instead of returning a non-working image).
 
-### Architecture examples ###
+### Architecture examples
 
 #### x86
 
@@ -33,7 +33,7 @@ Example output on Alpine:
 Example output on Debian
 
 ```
-/usr/bin/file: ELF 32-bit LSB shared object, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 3.2.0, BuildID[sha1]=d48e1d621e9b833b5d33ede3b4673535df181fe0, stripped  
+/usr/bin/file: ELF 32-bit LSB shared object, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 3.2.0, BuildID[sha1]=d48e1d621e9b833b5d33ede3b4673535df181fe0, stripped
 ```
 
 #### amd64
@@ -165,7 +165,6 @@ The default behaviour of the script can be overridden through the use of environ
 |-----|-----|
 | `S6OVERLAY_ARCH` | If set, overrides architecture detection and will install the architecture specified. Can be set to one of the following: `aarch64`, `amd64`, `arm`, `armhf`, `ppc64le`, `x86`. |
 | `S6OVERLAY_VERSION` | If set, will install a specific release of s6-overlay (instead of the latest stable). See [here](https://github.com/just-containers/s6-overlay/releases) for a list of releases.
-
 
 ## Testing
 
