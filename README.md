@@ -4,7 +4,7 @@
 
 Prevents the need for per-architecture Dockerfiles, and allows all s6-overlay deployment tasks to be done within a single layer.
 
-## Prerequisites:
+## Prerequisites
 
 - [`file`](https://github.com/file/file)
 - [`gnupg or gnupg2`](https://www.gnupg.org)
