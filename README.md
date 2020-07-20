@@ -175,3 +175,5 @@ The script is linted with [Shellcheck](https://github.com/koalaman/shellcheck).
 ## Getting help
 
 Please feel free to [open an issue on the project's GitHub](https://github.com/mikenye/deploy-s6-overlay/issues).
+
+I also have a [Discord channel](https://discord.gg/W4zncxj), feel free to [join](https://discord.gg/W4zncxj) and converse.
