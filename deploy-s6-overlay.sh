@@ -180,7 +180,7 @@ fi
 
 # Install s6-overlay
 echo "[$APPNAME] Unpacking s6-overlay"
-tar -xzf /tmp/s6-overlay.tar.gz -C /
+tar -hxzf /tmp/s6-overlay.tar.gz -C /
 
 # Test
 echo "[$APPNAME] Testing s6-overlay"
