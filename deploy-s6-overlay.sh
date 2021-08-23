@@ -145,8 +145,8 @@ then
   curl -s --location --output /tmp/s6-overlay.tar.gz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz"
   if [ $VERIFY -eq 1 ]
   then
-    echo "[$APPNAME] Importing justcontainers gpg key from: https://keybase.io/justcontainers/key.asc"
-    curl -s --location https://keybase.io/justcontainers/key.asc | gpg --import
+#     echo "[$APPNAME] Importing justcontainers gpg key from: https://keybase.io/justcontainers/key.asc"
+#     curl -s --location https://keybase.io/justcontainers/key.asc | gpg --import
     echo "[$APPNAME] Downloading s6-overlay signature from: https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz.sig"
     curl -s --location --output /tmp/s6-overlay.tar.gz.sig "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz.sig"
   fi
@@ -155,8 +155,8 @@ then
   wget -q -O /tmp/s6-overlay.tar.gz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz"
   if [ $VERIFY -eq 1 ]
   then
-    echo "[$APPNAME] Importing justcontainers gpg key from: https://keybase.io/justcontainers/key.asc"
-    wget -q -O - https://keybase.io/justcontainers/key.asc | gpg --import
+#     echo "[$APPNAME] Importing justcontainers gpg key from: https://keybase.io/justcontainers/key.asc"
+#     wget -q -O - https://keybase.io/justcontainers/key.asc | gpg --import
     echo "[$APPNAME] Downloading s6-overlay signature from: https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz.sig"
     wget -q -O /tmp/s6-overlay.tar.gz.sig "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz.sig"
   fi
@@ -166,9 +166,14 @@ else
 fi
 
 # Verify the download
-echo "[$APPNAME] Verifying s6-overlay download with gpg"
 if [ $VERIFY -eq 1 ]; then
-  #cat /tmp/s6-overlay.key | gpg --import
+
+  # Import PGP key from MIT
+  echo "[$APPNAME] Importing justcontainers gpg key from pgp.mit.edu"
+  gpg --keyserver pgp.mit.edu --recv-keys 6101B2783B2FD161
+
+  # Verify download
+  echo "[$APPNAME] Verifying s6-overlay download with gpg"
   if gpg --verify /tmp/s6-overlay.tar.gz.sig /tmp/s6-overlay.tar.gz;
   then
     echo "[$APPNAME] s6-overlay.tar.gz verified ok"
