@@ -10,6 +10,12 @@ Prevents the need for per-architecture Dockerfiles, and allows all s6-overlay de
 - [`gnupg or gnupg2`](https://www.gnupg.org)
 - [`curl`](https://curl.haxx.se) or [`wget`](https://www.gnu.org/software/wget/) (and also `ca-certificates` if not installed already)
 
+## Note regarding verification of s6-overlay download
+
+As of https://github.com/just-containers/s6-overlay/commit/4f4ea4c4741851c611f960230ccd2835d67702bd, s6-overlay is temporarily no longer signed by `gpg`, and thus verification of downloads by this script has been temporarily disabled.
+
+When the s6-overlay team re-implement release signing, I will revert the script to verify downloads again.
+
 ## How it works
 
 Originally the script would use `uname -m` to determine the container architecture, however this method has been abandoned. If cross-building (ie: building for i386 on amd64), you'd get the wrong architecture, as `uname -m` would return amd64.
@@ -90,16 +96,20 @@ Example output on Debian:
 
 Ensure you have `file`, `gnupg`/`gnugp2`, `wget`/`curl` and `ca-certificates` available.
 
-In your project's `Dockerfile`, add one of the following commands early on within a `RUN` instruction:
+In your project's `Dockerfile`, add one of the following early on within a `RUN` instruction:
 
 ```shell
-curl -s https://raw.githubusercontent.com/mikenye/deploy-s6-overlay/master/deploy-s6-overlay.sh | sh
+curl -o /tmp/deploy-s6-overlay.sh -s https://raw.githubusercontent.com/mikenye/deploy-s6-overlay/master/deploy-s6-overlay.sh && \
+sh /tmp/deploy-s6-overlay.sh && \
+rm /tmp/deploy-s6-overlay.sh && \
 ```
 
 or:
 
 ```shell
-wget -q -O - https://raw.githubusercontent.com/mikenye/deploy-s6-overlay/master/deploy-s6-overlay.sh | sh
+wget -q -O /tmp/deploy-s6-overlay.sh https://raw.githubusercontent.com/mikenye/deploy-s6-overlay/master/deploy-s6-overlay.sh && \
+sh /tmp/deploy-s6-overlay.sh && \
+rm /tmp/deploy-s6-overlay.sh && \
 ```
 
 Both of the above methods achieve the same thing.
