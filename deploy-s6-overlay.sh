@@ -2,8 +2,12 @@
 #shellcheck shell=sh
 
 APPNAME="deploy-s6-overlay"
-
 echo "[$APPNAME] s6-overlay deployment started"
+
+# If user has not specified a version, temporarily pin version v2.2.0.3 - v3.0.0.0 does not yet have binary releases
+if [[ -z "$S6OVERLAY_VERSION" ]]; then
+  S6OVERLAY_VERSION="v2.2.0.3"
+fi
 
 # Determine which downloader to use
 # Check if curl is available
