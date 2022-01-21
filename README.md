@@ -6,9 +6,20 @@ Prevents the need for per-architecture Dockerfiles, and allows all s6-overlay de
 
 ## Prerequisites
 
-- [`file`](https://github.com/file/file)
-- [`gnupg or gnupg2`](https://www.gnupg.org)
-- [`curl`](https://curl.haxx.se) or [`wget`](https://www.gnu.org/software/wget/) (and also `ca-certificates` if not installed already)
+* [`file`](https://github.com/file/file)
+* [`gnupg or gnupg2`](https://www.gnupg.org)
+* [`curl`](https://curl.haxx.se) or [`wget`](https://www.gnu.org/software/wget/) (and also `ca-certificates` if not installed already)
+
+## Note regarding verification & version of s6-overlay
+
+s6-overlay version 3.0.0.0 has just been released! Well done to the s6-overlay dev team.
+
+As the s6-overlay dev team work to update their CI actions to support this new version, currently:
+
+* s6-overlay is temporarily no longer signed by `gpg`, and thus verification of downloads by this script has been temporarily disabled.
+* Pre-built binaries for version 3.0.0.0 are not yet available, and thus this script will download v2.2.0.3 (unless the user specifies another version, v3.0.0.0 will fail until binaries are released)
+
+When the s6-overlay team update their CIs, I'll revert the script back to normal behaviour.
 
 ## How it works
 
@@ -90,16 +101,20 @@ Example output on Debian:
 
 Ensure you have `file`, `gnupg`/`gnugp2`, `wget`/`curl` and `ca-certificates` available.
 
-In your project's `Dockerfile`, add one of the following commands early on within a `RUN` instruction:
+In your project's `Dockerfile`, add one of the following early on within a `RUN` instruction:
 
 ```shell
-curl -s https://raw.githubusercontent.com/mikenye/deploy-s6-overlay/master/deploy-s6-overlay.sh | sh
+curl -o /tmp/deploy-s6-overlay.sh -s https://raw.githubusercontent.com/mikenye/deploy-s6-overlay/master/deploy-s6-overlay.sh && \
+sh /tmp/deploy-s6-overlay.sh && \
+rm /tmp/deploy-s6-overlay.sh && \
 ```
 
 or:
 
 ```shell
-wget -q -O - https://raw.githubusercontent.com/mikenye/deploy-s6-overlay/master/deploy-s6-overlay.sh | sh
+wget -q -O /tmp/deploy-s6-overlay.sh https://raw.githubusercontent.com/mikenye/deploy-s6-overlay/master/deploy-s6-overlay.sh && \
+sh /tmp/deploy-s6-overlay.sh && \
+rm /tmp/deploy-s6-overlay.sh && \
 ```
 
 Both of the above methods achieve the same thing.
