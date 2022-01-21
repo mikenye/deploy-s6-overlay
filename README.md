@@ -6,9 +6,9 @@ Prevents the need for per-architecture Dockerfiles, and allows all s6-overlay de
 
 ## Prerequisites
 
-- [`file`](https://github.com/file/file)
-- [`gnupg or gnupg2`](https://www.gnupg.org)
-- [`curl`](https://curl.haxx.se) or [`wget`](https://www.gnu.org/software/wget/) (and also `ca-certificates` if not installed already)
+* [`file`](https://github.com/file/file)
+* [`gnupg or gnupg2`](https://www.gnupg.org)
+* [`curl`](https://curl.haxx.se) or [`wget`](https://www.gnu.org/software/wget/) (and also `ca-certificates` if not installed already)
 
 ## Note regarding verification & version of s6-overlay
 
