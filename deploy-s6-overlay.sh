@@ -168,7 +168,7 @@ fi
 # Verify the download
 if [ $VERIFY -eq 1 ]; then
 
-  gpg --import hkps://keyserver.ubuntu.com
+  gpg --keyserver hkps://keyserver.ubuntu.com --recv 337EE704693C17EF
 
   # Verify download
   echo "[$APPNAME] Verifying s6-overlay download with gpg"
