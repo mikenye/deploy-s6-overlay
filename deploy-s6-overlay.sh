@@ -21,14 +21,19 @@ else
   fi
 fi
 
-# Determine if gpg is available to verify our download
-if which gpg > /dev/null 2>&1; then
-  echo "[$APPNAME] Found gpg"
-  VERIFY=1
-else
-  echo "[$APPNAME] WARNING: gpg not available! Cannot verify s6-overlay download!"
-  VERIFY=0
-fi
+# Temporarily disable verifying.
+# As of https://github.com/just-containers/s6-overlay/commit/4f4ea4c4741851c611f960230ccd2835d67702bd, 
+# releases are not signed.
+# Hopefully this can be re-enabled soon.
+VERIFY=0
+# # Determine if gpg is available to verify our download
+# if which gpg > /dev/null 2>&1; then
+#   echo "[$APPNAME] Found gpg"
+#   VERIFY=1
+# else
+#   echo "[$APPNAME] WARNING: gpg not available! Cannot verify s6-overlay download!"
+#   VERIFY=0
+# fi
 
 # If S6 version not specified...
 if [ -z "${S6OVERLAY_VERSION}" ]; then
