@@ -10,11 +10,16 @@ Prevents the need for per-architecture Dockerfiles, and allows all s6-overlay de
 - [`gnupg or gnupg2`](https://www.gnupg.org)
 - [`curl`](https://curl.haxx.se) or [`wget`](https://www.gnu.org/software/wget/) (and also `ca-certificates` if not installed already)
 
-## Note regarding verification of s6-overlay download
+## Note regarding verification & version of s6-overlay
 
-As of https://github.com/just-containers/s6-overlay/commit/4f4ea4c4741851c611f960230ccd2835d67702bd, s6-overlay is temporarily no longer signed by `gpg`, and thus verification of downloads by this script has been temporarily disabled.
+s6-overlay version 3.0.0.0 has just been released! Well done to the s6-overlay dev team.
 
-When the s6-overlay team re-implement release signing, I will revert the script to verify downloads again.
+As the s6-overlay dev team work to update their CI actions to support this new version, currently:
+
+* s6-overlay is temporarily no longer signed by `gpg`, and thus verification of downloads by this script has been temporarily disabled.
+* Pre-built binaries for version 3.0.0.0 are not yet available, and thus this script will download v2.2.0.3 (unless the user specifies another version, v3.0.0.0 will fail until binaries are released)
+
+When the s6-overlay team update their CIs, I'll revert the script back to normal behaviour.
 
 ## How it works
 
