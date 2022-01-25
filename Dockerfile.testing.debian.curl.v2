@@ -1,14 +1,15 @@
 # Testing Debian
 FROM debian:stable-slim AS debian_tester
 COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
+ENV S6OVERLAY_VERSION=v2.2.0.3
 RUN apt-get update > /dev/null 2>&1 && \
     apt-get install -y --no-install-recommends \
       ca-certificates \
-      wget \
+      curl \
       file \
       xz-utils \
       && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     file "$(which file)" && \
-    /src/deploy-s6-overlay.sh
+    sh /src/deploy-s6-overlay.sh

@@ -1,11 +1,10 @@
 # Testing alpine:
 FROM alpine:latest AS alpine_tester
 COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
+ENV S6OVERLAY_VERSION=v2.2.0.3
 RUN apk --no-cache add \
       file \
-      curl \
       && \
-    # remove wget
-    find / -name wget -exec rm -v {} \; && \
     file "$(which file)" && \
-    sh /src/deploy-s6-overlay.sh
+    set -x && \
+    sh -x /src/deploy-s6-overlay.sh
