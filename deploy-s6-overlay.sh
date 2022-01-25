@@ -131,6 +131,14 @@ if [ "$DOWNLOADER" = "curl" ]; then
       exit 1
     fi
 
+    # attempt to download overlay symlinks-noarch tarball
+    if curl -s --location --output /tmp/s6-overlay.symlinks-noarch.tar.xz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-symlinks-noarch-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz"; then
+      echo "[$APPNAME] s6-overlay symlinks-noarch downloaded OK"
+    else
+      echo "[$APPNAME] ERROR: could not download s6-overlay symlinks-noarch!"
+      exit 1
+    fi
+
   # if above failed, attempt to download binary tarball with .tar.gz extension (for older releases)
   elif curl -s --location --output /tmp/s6-overlay.tar.gz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz"; then
     echo "[$APPNAME] s6-overlay binaries downloaded OK"
@@ -150,6 +158,14 @@ if [ "$DOWNLOADER" = "curl" ]; then
       echo "[$APPNAME] s6-overlay scripts checksum downloaded OK"
     else
       echo "[$APPNAME] ERROR: could not download s6-overlay scripts checksum!"
+      exit 1
+    fi
+
+    # attempt to download overlay symlinks-noarch tarball checksum
+    if curl -s --location --output /tmp/s6-overlay.symlinks-noarch.tar.xz.sha256 "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-symlinks-noarch-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz.sha256"; then
+      echo "[$APPNAME] s6-overlay symlinks-noarch checksum downloaded OK"
+    else
+      echo "[$APPNAME] ERROR: could not download s6-overlay symlinks-noarch checksum!"
       exit 1
     fi
 
@@ -177,6 +193,14 @@ elif [ "$DOWNLOADER" = "wget" ]; then
       exit 1
     fi
 
+    # attempt to download overlay symlinks-noarch tarball
+    if wget -q -O /tmp/s6-overlay.symlinks-noarch.tar.xz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-symlinks-noarch-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz"; then
+      echo "[$APPNAME] s6-overlay symlinks-noarch downloaded OK"
+    else
+      echo "[$APPNAME] ERROR: could not download s6-overlay symlinks-noarch!"
+      exit 1
+    fi
+
   # if above failed, attempt to download binary tarball with .tar.gz extension (for older releases)
   elif wget -q -O /tmp/s6-overlay.tar.gz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz"; then
     echo "[$APPNAME] s6-overlay binaries downloaded OK"
@@ -189,13 +213,21 @@ elif [ "$DOWNLOADER" = "wget" ]; then
 
   # attempt to download binary checksum with .tar.xz.sha256 extension (for newer releases)
   if wget -q -O /tmp/s6-overlay.binaries.tar.xz.sha256 "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH_V3}-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz.sha256"; then
-    echo "[$APPNAME] s6-overlay checksum downloaded OK"
+    echo "[$APPNAME] s6-overlay binaries checksum downloaded OK"
 
     # attempt to download overlay scripts tarball checksum
     if wget -q -O /tmp/s6-overlay.scripts.tar.xz.sha256 "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-noarch-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz.sha256"; then
       echo "[$APPNAME] s6-overlay scripts checksum downloaded OK"
     else
       echo "[$APPNAME] ERROR: could not download s6-overlay scripts checksum!"
+      exit 1
+    fi
+
+    # attempt to download overlay symlinks-noarch tarball checksum
+    if wget -q -O /tmp/s6-overlay.symlinks-noarch.tar.xz.sha256 "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-symlinks-noarch-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz.sha256"; then
+      echo "[$APPNAME] s6-overlay symlinks-noarch checksum downloaded OK"
+    else
+      echo "[$APPNAME] ERROR: could not download s6-overlay symlinks-noarch checksum!"
       exit 1
     fi
 
@@ -250,7 +282,20 @@ if [ -e /tmp/s6-overlay.binaries.tar.xz.sha256 ]; then
     exit 1
   fi
 
-  
+  # re-write checksum file to reflect actual path of symlinks-noarch tarball
+  echo "$(cat /tmp/s6-overlay.symlinks-noarch.tar.xz.sha256 | tr -s " " | cut -d " " -f 1)  /tmp/s6-overlay.symlinks-noarch.tar.xz" > /tmp/s6-overlay.symlinks-noarch.tar.xz.sha256
+
+  # check symlinks-noarch checksum
+  if sha256sum -c /tmp/s6-overlay.symlinks-noarch.tar.xz.sha256; then
+    echo "[$APPNAME] symlinks-noarch checksum verified ok"
+  else
+    echo "[$APPNAME] ERROR: symlinks-noarch checksum did not verify ok"
+    echo -n "Downloaded checksum file: "
+    cat /tmp/s6-overlay.symlinks-noarch.tar.xz.sha256
+    echo -n "Checksum of downloaded tarball: "
+    sha256sum /tmp/s6-overlay.symlinks-noarch.tar.xz
+    exit 1
+  fi
 
 # verify .tar.gz.sig (for older releases)
 elif [ -e /tmp/s6-overlay.tar.gz.sig ]; then
@@ -289,7 +334,7 @@ if [ -e /tmp/s6-overlay.binaries.tar.xz ]; then
   if tar -hxf /tmp/s6-overlay.binaries.tar.xz -C /; then
     echo "[$APPNAME] s6-overlay binaries unpacked ok"
   else
-    echo "[$APPNAME] ERROR: s6-overlay did not unpack ok!"
+    echo "[$APPNAME] ERROR: s6-overlay binaries did not unpack ok!"
     exit 1
   fi
 
@@ -297,7 +342,15 @@ if [ -e /tmp/s6-overlay.binaries.tar.xz ]; then
   if tar -hxf /tmp/s6-overlay.scripts.tar.xz -C /; then
     echo "[$APPNAME] s6-overlay scripts unpacked ok"
   else
-    echo "[$APPNAME] ERROR: s6-overlay did not unpack ok!"
+    echo "[$APPNAME] ERROR: s6-overlay scripts did not unpack ok!"
+    exit 1
+  fi
+
+  # unpack symlinks-noarch
+  if tar -hxf /tmp/s6-overlay.symlinks-noarch.tar.xz -C /; then
+    echo "[$APPNAME] s6-overlay symlinks-noarch unpacked ok"
+  else
+    echo "[$APPNAME] ERROR: s6-overlay symlinks-noarch did not unpack ok!"
     exit 1
   fi
 
@@ -335,6 +388,10 @@ if [ -e /tmp/s6-overlay.scripts.tar.xz ]; then
   rm /tmp/s6-overlay.scripts.tar.xz
 fi
 
+if [ -e /tmp/s6-overlay.symlinks-noarch.tar.xz ]; then
+  rm /tmp/s6-overlay.symlinks-noarch.tar.xz
+fi
+
 if [ -e /tmp/s6-overlay.tar.gz ]; then
   rm /tmp/s6-overlay.tar.gz
 fi
@@ -345,6 +402,10 @@ fi
 
 if [ -e /tmp/s6-overlay.scripts.tar.xz.sha256 ]; then
   rm /tmp/s6-overlay.scripts.tar.xz.sha256
+fi
+
+if [ -e /tmp/s6-overlay.symlinks-noarch.tar.xz.sha256 ]; then
+  rm /tmp/s6-overlay.symlinks-noarch.tar.xz.sha256
 fi
 
 if [ -e /tmp/s6-overlay.tar.gz.sig ]; then
