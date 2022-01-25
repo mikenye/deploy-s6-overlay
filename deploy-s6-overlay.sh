@@ -59,7 +59,6 @@ if [ -z "${S6OVERLAY_ARCH}" ]; then
   # /usr/bin/file: ELF 32-bit LSB shared object, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 3.2.0, BuildID[sha1]=d48e1d621e9b833b5d33ede3b4673535df181fe0, stripped  
   if echo "${FILEOUTPUT}" | grep "Intel 80386" > /dev/null; then
     S6OVERLAY_ARCH="x86"
-    S6OVERLAY_ARCH_V3="i686"
   fi
 
   # x86-64
@@ -68,7 +67,6 @@ if [ -z "${S6OVERLAY_ARCH}" ]; then
   # /usr/bin/file: ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0, BuildID[sha1]=6b0b86f64e36f977d088b3e7046f70a586dd60e7, stripped
   if echo "${FILEOUTPUT}" | grep "x86-64" > /dev/null; then
     S6OVERLAY_ARCH="amd64"
-    S6OVERLAY_ARCH_V3="x86_64"
   fi
 
   # armel
@@ -76,7 +74,6 @@ if [ -z "${S6OVERLAY_ARCH}" ]; then
   if echo "${FILEOUTPUT}" | grep "ARM" > /dev/null; then
 
     S6OVERLAY_ARCH="arm"
-    S6OVERLAY_ARCH_V3="arm"
 
     # armhf
     # Example outputs:
@@ -84,7 +81,6 @@ if [ -z "${S6OVERLAY_ARCH}" ]; then
     # /usr/bin/file: ELF 32-bit LSB shared object, ARM, EABI5 version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux-armhf.so.3, for GNU/Linux 3.2.0, BuildID[sha1]=921490a07eade98430e10735d69858e714113c56, stripped
     if echo "${FILEOUTPUT}" | grep "armhf" > /dev/null; then
       S6OVERLAY_ARCH="armhf"
-      S6OVERLAY_ARCH_V3="armhf"
     fi
 
     # arm64
@@ -93,7 +89,6 @@ if [ -z "${S6OVERLAY_ARCH}" ]; then
     # /usr/bin/file: ELF 64-bit LSB shared object, ARM aarch64, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux-aarch64.so.1, for GNU/Linux 3.7.0, BuildID[sha1]=a8d6092fd49d8ec9e367ac9d451b3f55c7ae7a78, stripped
     if echo "${FILEOUTPUT}" | grep "aarch64" > /dev/null; then
       S6OVERLAY_ARCH="aarch64"
-      S6OVERLAY_ARCH_V3="aarch64"
     fi
 
   fi
@@ -108,8 +103,27 @@ fi
 
 # prepare extra variables needed for v3+
 S6OVERLAY_VERSION_NO_LEADING_V=$(echo "$S6OVERLAY_VERSION" | tr -d "v")
-
-
+case $S6OVERLAY_ARCH in
+  x86)
+    S6OVERLAY_ARCH_V3="i686"
+    ;;
+  amd64)
+    S6OVERLAY_ARCH_V3="x86_64"
+    ;;
+  arm)
+    S6OVERLAY_ARCH_V3="arm"
+    ;;
+  armhf)
+    S6OVERLAY_ARCH_V3="armhf"
+    ;;
+  aarch64)
+    S6OVERLAY_ARCH_V3="aarch64"
+    ;;
+  *)
+    echo "[$APPNAME] ERROR: Unable to determine architecture or unsupported architecture!"
+    exit 1
+    ;;
+esac
 
 echo "[$APPNAME] Deploying s6-overlay version ${S6OVERLAY_VERSION} for architecture ${S6OVERLAY_ARCH}"
 
