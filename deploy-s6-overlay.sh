@@ -55,29 +55,6 @@ if [ -z "${S6OVERLAY_ARCH}" ]; then
 
   echo "[$APPNAME] Determining architecture of target image"
 
-  #-----
-  #
-  # This old method of using `uname -m` has been abandoned.
-  # If cross-building (ie: building for i386 on amd64),
-  # You'd get the wrong architecture, as `uname -m` would return amd64.
-
-  # # Use the architecture of the build platform
-  # ARCH=$(uname -m)
-
-  # # Make architecture names match s6 overlay architecture names
-  # if [ ${ARCH} = "aarch64" ]; then
-  #   S6OVERLAY_ARCH="aarch64"
-  # elif [ ${ARCH} = "x86_64" ]; then
-  #   S6OVERLAY_ARCH="amd64"
-  # elif [ ${ARCH} = "armv7l" ]; then
-  #   S6OVERLAY_ARCH="armhf"
-  # else
-  #   echo "Unknown architecture"
-  #   exit 1
-  # fi
-  #
-  #-----
-
   # If cross-building, we have no way to determine this without looking at the installed binaries using libmagic/file
   # Do we have libmagic/file installed
   
