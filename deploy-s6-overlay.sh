@@ -428,6 +428,7 @@ fi
 # Test
 echo "[$APPNAME] Testing s6-overlay"
 
+sync
 ls -la /bin
 
 sh -c /bin/s6-clock > /dev/null || exit 1
