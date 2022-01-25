@@ -36,9 +36,6 @@ if [ -z "${S6OVERLAY_VERSION}" ]; then
   fi
 fi
 
-# version variable that has no leading v
-S6OVERLAY_VERSION_NO_LEADING_V=$(echo "$S6OVERLAY_VERSION" | tr -d "v")
-
 # If S6 architecture not specified...
 if [ -z "${S6OVERLAY_ARCH}" ]; then
 
@@ -62,6 +59,7 @@ if [ -z "${S6OVERLAY_ARCH}" ]; then
   # /usr/bin/file: ELF 32-bit LSB shared object, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 3.2.0, BuildID[sha1]=d48e1d621e9b833b5d33ede3b4673535df181fe0, stripped  
   if echo "${FILEOUTPUT}" | grep "Intel 80386" > /dev/null; then
     S6OVERLAY_ARCH="x86"
+    S6OVERLAY_ARCH_V3="i686"
   fi
 
   # x86-64
@@ -70,6 +68,7 @@ if [ -z "${S6OVERLAY_ARCH}" ]; then
   # /usr/bin/file: ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0, BuildID[sha1]=6b0b86f64e36f977d088b3e7046f70a586dd60e7, stripped
   if echo "${FILEOUTPUT}" | grep "x86-64" > /dev/null; then
     S6OVERLAY_ARCH="amd64"
+    S6OVERLAY_ARCH_V3="x86_64"
   fi
 
   # armel
@@ -77,6 +76,7 @@ if [ -z "${S6OVERLAY_ARCH}" ]; then
   if echo "${FILEOUTPUT}" | grep "ARM" > /dev/null; then
 
     S6OVERLAY_ARCH="arm"
+    S6OVERLAY_ARCH_V3="arm"
 
     # armhf
     # Example outputs:
@@ -84,6 +84,7 @@ if [ -z "${S6OVERLAY_ARCH}" ]; then
     # /usr/bin/file: ELF 32-bit LSB shared object, ARM, EABI5 version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux-armhf.so.3, for GNU/Linux 3.2.0, BuildID[sha1]=921490a07eade98430e10735d69858e714113c56, stripped
     if echo "${FILEOUTPUT}" | grep "armhf" > /dev/null; then
       S6OVERLAY_ARCH="armhf"
+      S6OVERLAY_ARCH_V3="armhf"
     fi
 
     # arm64
@@ -92,6 +93,7 @@ if [ -z "${S6OVERLAY_ARCH}" ]; then
     # /usr/bin/file: ELF 64-bit LSB shared object, ARM aarch64, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux-aarch64.so.1, for GNU/Linux 3.7.0, BuildID[sha1]=a8d6092fd49d8ec9e367ac9d451b3f55c7ae7a78, stripped
     if echo "${FILEOUTPUT}" | grep "aarch64" > /dev/null; then
       S6OVERLAY_ARCH="aarch64"
+      S6OVERLAY_ARCH_V3="aarch64"
     fi
 
   fi
@@ -104,6 +106,11 @@ if [ -z "${S6OVERLAY_ARCH}" ]; then
   exit 1
 fi
 
+# prepare extra variables needed for v3+
+S6OVERLAY_VERSION_NO_LEADING_V=$(echo "$S6OVERLAY_VERSION" | tr -d "v")
+
+
+
 echo "[$APPNAME] Deploying s6-overlay version ${S6OVERLAY_VERSION} for architecture ${S6OVERLAY_ARCH}"
 
 # Download S6 Overlay binaries/signatures/checksums
@@ -113,7 +120,7 @@ mkdir -p /tmp
 if [ "$DOWNLOADER" = "curl" ]; then
 
   # attempt to download binary tarball with .tar.xz extension (for newer releases)
-  if curl -s --location --output /tmp/s6-overlay.tar.xz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz"; then
+  if curl -s --location --output /tmp/s6-overlay.tar.xz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH_V3}-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz"; then
     echo "[$APPNAME] s6-overlay binaries downloaded OK"
 
   # if above failed, attempt to download binary tarball with .tar.gz extension (for older releases)
@@ -127,7 +134,7 @@ if [ "$DOWNLOADER" = "curl" ]; then
   fi
 
   # attempt to download binary checksum with .tar.xz.sha256 extension (for newer releases)
-  if curl -s --location --output /tmp/s6-overlay.tar.xz.sha256 "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz.sha256"; then
+  if curl -s --location --output /tmp/s6-overlay.tar.xz.sha256 "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH_V3}-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz.sha256"; then
     echo "[$APPNAME] s6-overlay binaries downloaded OK"
 
   # if above failed, attempt to download signature with .tar.gz.sig extension (for older releases)
@@ -143,7 +150,7 @@ if [ "$DOWNLOADER" = "curl" ]; then
 elif [ "$DOWNLOADER" = "wget" ]; then
 
   # attempt to download binary tarball with .tar.xz extension (for newer releases)
-  if wget -q -O /tmp/s6-overlay.tar.xz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz"; then
+  if wget -q -O /tmp/s6-overlay.tar.xz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH_V3}-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz"; then
     echo "[$APPNAME] s6-overlay binaries downloaded OK"
 
   # if above failed, attempt to download binary tarball with .tar.gz extension (for older releases)
@@ -157,7 +164,7 @@ elif [ "$DOWNLOADER" = "wget" ]; then
   fi
 
   # attempt to download binary checksum with .tar.xz.sha256 extension (for newer releases)
-  if wget -q -O /tmp/s6-overlay.tar.xz.sha256 "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz.sha256"; then
+  if wget -q -O /tmp/s6-overlay.tar.xz.sha256 "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH_V3}-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz.sha256"; then
     echo "[$APPNAME] s6-overlay binaries downloaded OK"
 
   # if above failed, attempt to download signature with .tar.gz.sig extension (for older releases)
