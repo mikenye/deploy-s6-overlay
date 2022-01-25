@@ -1,0 +1,9 @@
+# Testing alpine:
+FROM alpine:latest AS alpine_tester
+COPY deploy-s6-overlay.sh /src/deploy-s6-overlay.sh
+RUN apk --no-cache add \
+      file \
+      && \
+    file "$(which file)" && \
+    set -x && \
+    sh -x /src/deploy-s6-overlay.sh
