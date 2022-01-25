@@ -378,7 +378,7 @@ echo "[$APPNAME] Unpacking s6-overlay"
 if [ -e /tmp/s6-overlay.binaries.tar.xz ]; then
 
   # unpack binaries
-  if tar -hxf /tmp/s6-overlay.binaries.tar.xz -C /; then
+  if tar -hvxf /tmp/s6-overlay.binaries.tar.xz -C /; then
     echo "[$APPNAME] s6-overlay binaries unpacked ok"
   else
     echo "[$APPNAME] ERROR: s6-overlay binaries did not unpack ok!"
@@ -386,7 +386,7 @@ if [ -e /tmp/s6-overlay.binaries.tar.xz ]; then
   fi
 
   # unpack scripts
-  if tar -hxf /tmp/s6-overlay.scripts.tar.xz -C /; then
+  if tar -hvxf /tmp/s6-overlay.scripts.tar.xz -C /; then
     echo "[$APPNAME] s6-overlay scripts unpacked ok"
   else
     echo "[$APPNAME] ERROR: s6-overlay scripts did not unpack ok!"
@@ -394,7 +394,7 @@ if [ -e /tmp/s6-overlay.binaries.tar.xz ]; then
   fi
 
   # unpack symlinks-noarch
-  if tar -hxf /tmp/s6-overlay.symlinks-noarch.tar.xz -C /; then
+  if tar -hvxf /tmp/s6-overlay.symlinks-noarch.tar.xz -C /; then
     echo "[$APPNAME] s6-overlay symlinks-noarch unpacked ok"
   else
     echo "[$APPNAME] ERROR: s6-overlay symlinks-noarch did not unpack ok!"
@@ -402,7 +402,7 @@ if [ -e /tmp/s6-overlay.binaries.tar.xz ]; then
   fi
 
   # unpack symlinks-arch
-  if tar -hxf /tmp/s6-overlay.symlinks-arch.tar.xz -C /; then
+  if tar -hvxf /tmp/s6-overlay.symlinks-arch.tar.xz -C /; then
     echo "[$APPNAME] s6-overlay symlinks-arch unpacked ok"
   else
     echo "[$APPNAME] ERROR: s6-overlay symlinks-arch did not unpack ok!"
