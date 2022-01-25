@@ -197,6 +197,9 @@ if [ -e /tmp/s6-overlay.tar.xz.sha256 ]; then
     echo "[$APPNAME] checksum verified ok"
   else
     echo "[$APPNAME] ERROR: checksum did not verify ok"
+    echo -n "Downloaded checksum file: "
+    cat /tmp/s6-overlay.tar.xz.sha256
+    echo -n "Checksum of downloaded tarball: "
     sha256sum /tmp/s6-overlay.tar.xz
     exit 1
   fi
