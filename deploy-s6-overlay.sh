@@ -192,6 +192,7 @@ if [ -e /tmp/s6-overlay.tar.xz.sha256 ]; then
     echo "[$APPNAME] checksum verified ok"
   else
     echo "[$APPNAME] ERROR: checksum did not verify ok"
+    sha256sum /tmp/s6-overlay.tar.xz
     exit 1
   fi
 
