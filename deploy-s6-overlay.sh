@@ -135,11 +135,11 @@ if [ "$DOWNLOADER" = "curl" ]; then
 
   # attempt to download binary checksum with .tar.xz.sha256 extension (for newer releases)
   if curl -s --location --output /tmp/s6-overlay.tar.xz.sha256 "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH_V3}-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz.sha256"; then
-    echo "[$APPNAME] s6-overlay binaries downloaded OK"
+    echo "[$APPNAME] s6-overlay checksum downloaded OK"
 
   # if above failed, attempt to download signature with .tar.gz.sig extension (for older releases)
   elif curl -s --location --output /tmp/s6-overlay.tar.gz.sig "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz.sig"; then
-    echo "[$APPNAME] s6-overlay binaries downloaded OK"
+    echo "[$APPNAME] s6-overlay signature downloaded OK"
 
   # if above downloads all failed, then error
   else
@@ -165,11 +165,11 @@ elif [ "$DOWNLOADER" = "wget" ]; then
 
   # attempt to download binary checksum with .tar.xz.sha256 extension (for newer releases)
   if wget -q -O /tmp/s6-overlay.tar.xz.sha256 "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH_V3}-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz.sha256"; then
-    echo "[$APPNAME] s6-overlay binaries downloaded OK"
+    echo "[$APPNAME] s6-overlay checksum downloaded OK"
 
   # if above failed, attempt to download signature with .tar.gz.sig extension (for older releases)
   elif wget -q -O /tmp/s6-overlay.tar.gz.sig "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz.sig"; then
-    echo "[$APPNAME] s6-overlay binaries downloaded OK"
+    echo "[$APPNAME] s6-overlay signature downloaded OK"
 
   # if above downloads all failed, then error
   else
@@ -206,8 +206,7 @@ elif [ -e /tmp/s6-overlay.tar.gz.sig ]
     gpg --keyserver hkps://keyserver.ubuntu.com --recv 337EE704693C17EF
 
     # verify signature
-    if gpg --verify /tmp/s6-overlay.tar.gz.sig /tmp/s6-overlay.tar.gz;
-    then
+    if gpg --verify /tmp/s6-overlay.tar.gz.sig /tmp/s6-overlay.tar.gz; then
       echo "[$APPNAME] s6-overlay.tar.gz verified ok"
     else
       echo "[$APPNAME] ERROR: s6-overlay.tar.gz did not verify ok"
