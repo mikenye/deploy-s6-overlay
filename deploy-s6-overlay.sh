@@ -196,7 +196,7 @@ if [ -e /tmp/s6-overlay.tar.xz.sha256 ]; then
   fi
 
 # verify .tar.gz.sig (for older releases)
-elif [ -e /tmp/s6-overlay.tar.gz.sig ]
+elif [ -e /tmp/s6-overlay.tar.gz.sig ]; then
 
   # check if gpg is available
   if which gpg > /dev/null 2>&1; then
