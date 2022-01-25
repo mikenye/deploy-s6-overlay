@@ -228,6 +228,11 @@ elif [ "$DOWNLOADER" = "wget" ]; then
   # if above failed, attempt to download binary tarball with .tar.gz extension (for older releases)
   elif wget -q -O /tmp/s6-overlay.tar.gz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz"; then
     echo "[$APPNAME] s6-overlay binaries downloaded OK"
+    
+    # remove zero-length file from previous step, if it exists
+    if [ -e /tmp/s6-overlay.binaries.tar.xz ]; then
+      rm /tmp/s6-overlay.binaries.tar.xz
+    fi
 
   # if above downloads all failed, then error
   else
@@ -266,6 +271,11 @@ elif [ "$DOWNLOADER" = "wget" ]; then
   # if above failed, attempt to download signature with .tar.gz.sig extension (for older releases)
   elif wget -q -O /tmp/s6-overlay.tar.gz.sig "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz.sig"; then
     echo "[$APPNAME] s6-overlay signature downloaded OK"
+
+    # remove zero-length file from previous step, if it exists
+    if [ -e /tmp/s6-overlay.binaries.tar.xz.sha256 ]; then
+      rm /tmp/s6-overlay.binaries.tar.xz.sha256
+    fi
 
   # if above downloads all failed, then error
   else
