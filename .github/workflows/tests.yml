@@ -1,0 +1,43 @@
+name: Tests
+
+on:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test-alpine-curl:
+    name: Test Alpine curl
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build (verbose)
+      run: docker build --no-cache . --file Dockerfile.testing.alpine.curl.verbose
+    - name: Build (quiet)
+      run: docker build --no-cache . --file Dockerfile.testing.alpine.curl.quiet
+  test-alpine-wget:
+    name: Test Alpine wget
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build (verbose)
+      run: docker build --no-cache . --file Dockerfile.testing.alpine.wget.verbose
+    - name: Build (quiet)
+      run: docker build --no-cache . --file Dockerfile.testing.alpine.wget.quiet
+  test-debian-curl:
+    name: Test Debian curl
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build (verbose)
+      run: docker build --no-cache . --file Dockerfile.testing.debian.curl.verbose
+    - name: Build (quiet)
+      run: docker build --no-cache . --file Dockerfile.testing.debian.curl.quiet
+  test-debian-wget:
+    name: Test Debian wget
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build (verbose)
+      run: docker build --no-cache . --file Dockerfile.testing.debian.wget.verbose
+    - name: Build (quiet)
+      run: docker build --no-cache . --file Dockerfile.testing.debian.wget.quiet
