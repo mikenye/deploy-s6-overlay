@@ -188,7 +188,7 @@ fi
 # verify .tar.xz.sha256 (for newer releases)
 if [ -e /tmp/s6-overlay.tar.xz.sha256 ]; then
   SHA256SUM=$(cat /tmp/s6-overlay.tar.xz.sha256 | tr -s " " | cut -d " " -f 1)
-  if echo "$SHA256SUM /tmp/s6-overlay.tar.xz" | sha256sum --check; then
+  if echo "$SHA256SUM /tmp/s6-overlay.tar.xz" | sha256sum -c; then
     echo "[$APPNAME] checksum verified ok"
   else
     echo "[$APPNAME] ERROR: checksum did not verify ok"
