@@ -139,6 +139,14 @@ if [ "$DOWNLOADER" = "curl" ]; then
       exit 1
     fi
 
+    # attempt to download overlay symlinks-arch tarball
+    if curl -s --location --output /tmp/s6-overlay.symlinks-arch.tar.xz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-symlinks-arch-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz"; then
+      echo "[$APPNAME] s6-overlay symlinks-arch downloaded OK"
+    else
+      echo "[$APPNAME] ERROR: could not download s6-overlay symlinks-arch!"
+      exit 1
+    fi
+
   # if above failed, attempt to download binary tarball with .tar.gz extension (for older releases)
   elif curl -s --location --output /tmp/s6-overlay.tar.gz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz"; then
     echo "[$APPNAME] s6-overlay binaries downloaded OK"
@@ -166,6 +174,14 @@ if [ "$DOWNLOADER" = "curl" ]; then
       echo "[$APPNAME] s6-overlay symlinks-noarch checksum downloaded OK"
     else
       echo "[$APPNAME] ERROR: could not download s6-overlay symlinks-noarch checksum!"
+      exit 1
+    fi
+
+    # attempt to download overlay symlinks-arch tarball checksum
+    if curl -s --location --output /tmp/s6-overlay.symlinks-arch.tar.xz.sha256 "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-symlinks-arch-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz.sha256"; then
+      echo "[$APPNAME] s6-overlay symlinks-arch checksum downloaded OK"
+    else
+      echo "[$APPNAME] ERROR: could not download s6-overlay symlinks-arch checksum!"
       exit 1
     fi
 
@@ -201,6 +217,14 @@ elif [ "$DOWNLOADER" = "wget" ]; then
       exit 1
     fi
 
+    # attempt to download overlay symlinks-arch tarball
+    if wget -q -O /tmp/s6-overlay.symlinks-arch.tar.xz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-symlinks-arch-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz"; then
+      echo "[$APPNAME] s6-overlay symlinks-arch downloaded OK"
+    else
+      echo "[$APPNAME] ERROR: could not download s6-overlay symlinks-arch!"
+      exit 1
+    fi
+
   # if above failed, attempt to download binary tarball with .tar.gz extension (for older releases)
   elif wget -q -O /tmp/s6-overlay.tar.gz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz"; then
     echo "[$APPNAME] s6-overlay binaries downloaded OK"
@@ -228,6 +252,14 @@ elif [ "$DOWNLOADER" = "wget" ]; then
       echo "[$APPNAME] s6-overlay symlinks-noarch checksum downloaded OK"
     else
       echo "[$APPNAME] ERROR: could not download s6-overlay symlinks-noarch checksum!"
+      exit 1
+    fi
+
+    # attempt to download overlay symlinks-arch tarball checksum
+    if wget -q -O /tmp/s6-overlay.symlinks-arch.tar.xz.sha256 "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-symlinks-arch-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz.sha256"; then
+      echo "[$APPNAME] s6-overlay symlinks-arch checksum downloaded OK"
+    else
+      echo "[$APPNAME] ERROR: could not download s6-overlay symlinks-arch checksum!"
       exit 1
     fi
 
@@ -297,6 +329,21 @@ if [ -e /tmp/s6-overlay.binaries.tar.xz.sha256 ]; then
     exit 1
   fi
 
+  # re-write checksum file to reflect actual path of symlinks-noarch tarball
+  echo "$(cat /tmp/s6-overlay.symlinks-arch.tar.xz.sha256 | tr -s " " | cut -d " " -f 1)  /tmp/s6-overlay.symlinks-arch.tar.xz" > /tmp/s6-overlay.symlinks-arch.tar.xz.sha256
+
+  # check symlinks-noarch checksum
+  if sha256sum -c /tmp/s6-overlay.symlinks-arch.tar.xz.sha256; then
+    echo "[$APPNAME] symlinks-arch checksum verified ok"
+  else
+    echo "[$APPNAME] ERROR: symlinks-arch checksum did not verify ok"
+    echo -n "Downloaded checksum file: "
+    cat /tmp/s6-overlay.symlinks-arch.tar.xz.sha256
+    echo -n "Checksum of downloaded tarball: "
+    sha256sum /tmp/s6-overlay.symlinks-arch.tar.xz
+    exit 1
+  fi
+
 # verify .tar.gz.sig (for older releases)
 elif [ -e /tmp/s6-overlay.tar.gz.sig ]; then
 
@@ -354,6 +401,14 @@ if [ -e /tmp/s6-overlay.binaries.tar.xz ]; then
     exit 1
   fi
 
+  # unpack symlinks-arch
+  if tar -hxf /tmp/s6-overlay.symlinks-arch.tar.xz -C /; then
+    echo "[$APPNAME] s6-overlay symlinks-arch unpacked ok"
+  else
+    echo "[$APPNAME] ERROR: s6-overlay symlinks-arch did not unpack ok!"
+    exit 1
+  fi
+
 # attempt to unpack .tar.gz
 elif [ -e /tmp/s6-overlay.tar.gz ]; then
   if tar -hxf /tmp/s6-overlay.tar.gz -C /; then
@@ -392,6 +447,10 @@ if [ -e /tmp/s6-overlay.symlinks-noarch.tar.xz ]; then
   rm /tmp/s6-overlay.symlinks-noarch.tar.xz
 fi
 
+if [ -e /tmp/s6-overlay.symlinks-arch.tar.xz ]; then
+  rm /tmp/s6-overlay.symlinks-arch.tar.xz
+fi
+
 if [ -e /tmp/s6-overlay.tar.gz ]; then
   rm /tmp/s6-overlay.tar.gz
 fi
@@ -406,6 +465,10 @@ fi
 
 if [ -e /tmp/s6-overlay.symlinks-noarch.tar.xz.sha256 ]; then
   rm /tmp/s6-overlay.symlinks-noarch.tar.xz.sha256
+fi
+
+if [ -e /tmp/s6-overlay.symlinks-arch.tar.xz.sha256 ]; then
+  rm /tmp/s6-overlay.symlinks-arch.tar.xz.sha256
 fi
 
 if [ -e /tmp/s6-overlay.tar.gz.sig ]; then
