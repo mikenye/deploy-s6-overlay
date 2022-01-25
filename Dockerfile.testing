@@ -6,6 +6,7 @@ RUN apk --no-cache add \
       gnupg \
       > /dev/null 2>&1 && \
     file "$(which file)" && \
+    set -x && \
     /src/deploy-s6-overlay.sh
 
 # Testing Debian
@@ -22,4 +23,5 @@ RUN apt-get update > /dev/null 2>&1 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     file "$(which file)" && \
-    /src/deploy-s6-overlay.sh
+    set -x && \
+    sh -x /src/deploy-s6-overlay.sh
