@@ -120,8 +120,16 @@ mkdir -p /tmp
 if [ "$DOWNLOADER" = "curl" ]; then
 
   # attempt to download binary tarball with .tar.xz extension (for newer releases)
-  if curl -s --location --output /tmp/s6-overlay.tar.xz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH_V3}-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz"; then
+  if curl -s --location --output /tmp/s6-overlay.binaries.tar.xz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH_V3}-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz"; then
     echo "[$APPNAME] s6-overlay binaries downloaded OK"
+
+    # attempt to download overlay scripts tarball
+    if curl -s --location --output /tmp/s6-overlay.scripts.tar.xz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-noarch-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz"; then
+      echo "[$APPNAME] s6-overlay scripts downloaded OK"
+    else
+      echo "[$APPNAME] ERROR: could not download s6-overlay scripts!"
+      exit 1
+    fi
 
   # if above failed, attempt to download binary tarball with .tar.gz extension (for older releases)
   elif curl -s --location --output /tmp/s6-overlay.tar.gz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz"; then
@@ -134,8 +142,16 @@ if [ "$DOWNLOADER" = "curl" ]; then
   fi
 
   # attempt to download binary checksum with .tar.xz.sha256 extension (for newer releases)
-  if curl -s --location --output /tmp/s6-overlay.tar.xz.sha256 "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH_V3}-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz.sha256"; then
-    echo "[$APPNAME] s6-overlay checksum downloaded OK"
+  if curl -s --location --output /tmp/s6-overlay.binaries.tar.xz.sha256 "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH_V3}-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz.sha256"; then
+    echo "[$APPNAME] s6-overlay binaries checksum downloaded OK"
+
+    # attempt to download overlay scripts tarball checksum
+    if curl -s --location --output /tmp/s6-overlay.scripts.tar.xz.sha256 "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-noarch-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz.sha256"; then
+      echo "[$APPNAME] s6-overlay scripts checksum downloaded OK"
+    else
+      echo "[$APPNAME] ERROR: could not download s6-overlay scripts checksum!"
+      exit 1
+    fi
 
   # if above failed, attempt to download signature with .tar.gz.sig extension (for older releases)
   elif curl -s --location --output /tmp/s6-overlay.tar.gz.sig "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz.sig"; then
@@ -150,8 +166,16 @@ if [ "$DOWNLOADER" = "curl" ]; then
 elif [ "$DOWNLOADER" = "wget" ]; then
 
   # attempt to download binary tarball with .tar.xz extension (for newer releases)
-  if wget -q -O /tmp/s6-overlay.tar.xz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH_V3}-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz"; then
+  if wget -q -O /tmp/s6-overlay.binaries.tar.xz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH_V3}-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz"; then
     echo "[$APPNAME] s6-overlay binaries downloaded OK"
+
+    # attempt to download overlay scripts tarball
+    if wget -q -O /tmp/s6-overlay.scripts.tar.xz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-noarch-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz"; then
+      echo "[$APPNAME] s6-overlay scripts downloaded OK"
+    else
+      echo "[$APPNAME] ERROR: could not download s6-overlay scripts!"
+      exit 1
+    fi
 
   # if above failed, attempt to download binary tarball with .tar.gz extension (for older releases)
   elif wget -q -O /tmp/s6-overlay.tar.gz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz"; then
@@ -164,8 +188,16 @@ elif [ "$DOWNLOADER" = "wget" ]; then
   fi
 
   # attempt to download binary checksum with .tar.xz.sha256 extension (for newer releases)
-  if wget -q -O /tmp/s6-overlay.tar.xz.sha256 "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH_V3}-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz.sha256"; then
+  if wget -q -O /tmp/s6-overlay.binaries.tar.xz.sha256 "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH_V3}-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz.sha256"; then
     echo "[$APPNAME] s6-overlay checksum downloaded OK"
+
+    # attempt to download overlay scripts tarball checksum
+    if wget -q -O /tmp/s6-overlay.scripts.tar.xz.sha256 "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-noarch-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz.sha256"; then
+      echo "[$APPNAME] s6-overlay scripts checksum downloaded OK"
+    else
+      echo "[$APPNAME] ERROR: could not download s6-overlay scripts checksum!"
+      exit 1
+    fi
 
   # if above failed, attempt to download signature with .tar.gz.sig extension (for older releases)
   elif wget -q -O /tmp/s6-overlay.tar.gz.sig "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz.sig"; then
@@ -186,23 +218,39 @@ fi
 # Verify the download if possible
 
 # verify .tar.xz.sha256 (for newer releases)
-if [ -e /tmp/s6-overlay.tar.xz.sha256 ]; then
+if [ -e /tmp/s6-overlay.binaries.tar.xz.sha256 ]; then
 
-  # re-write checksum file to reflect actual path of tarball
-  SHA256SUM=$(cat /tmp/s6-overlay.tar.xz.sha256 | tr -s " " | cut -d " " -f 1)
-  echo "$SHA256SUM  /tmp/s6-overlay.tar.xz" > /tmp/s6-overlay.tar.xz.sha256
+  # re-write checksum file to reflect actual path of binaries tarball
+  echo "$(cat /tmp/s6-overlay.binaries.tar.xz.sha256 | tr -s " " | cut -d " " -f 1)  /tmp/s6-overlay.binaries.tar.xz" > /tmp/s6-overlay.binaries.tar.xz.sha256
 
-  # check checksum
-  if sha256sum -c /tmp/s6-overlay.tar.xz.sha256; then
-    echo "[$APPNAME] checksum verified ok"
+  # check binaries checksum
+  if sha256sum -c /tmp/s6-overlay.binaries.tar.xz.sha256; then
+    echo "[$APPNAME] binaries checksum verified ok"
   else
-    echo "[$APPNAME] ERROR: checksum did not verify ok"
+    echo "[$APPNAME] ERROR: binaries checksum did not verify ok"
     echo -n "Downloaded checksum file: "
-    cat /tmp/s6-overlay.tar.xz.sha256
+    cat /tmp/s6-overlay.binaries.tar.xz.sha256
     echo -n "Checksum of downloaded tarball: "
-    sha256sum /tmp/s6-overlay.tar.xz
+    sha256sum /tmp/s6-overlay.binaries.tar.xz
     exit 1
   fi
+
+  # re-write checksum file to reflect actual path of scripts tarball
+  echo "$(cat /tmp/s6-overlay.scripts.tar.xz.sha256 | tr -s " " | cut -d " " -f 1)  /tmp/s6-overlay.scripts.tar.xz" > /tmp/s6-overlay.scripts.tar.xz.sha256
+
+  # check scripts checksum
+  if sha256sum -c /tmp/s6-overlay.scripts.tar.xz.sha256; then
+    echo "[$APPNAME] scripts checksum verified ok"
+  else
+    echo "[$APPNAME] ERROR: scripts checksum did not verify ok"
+    echo -n "Downloaded checksum file: "
+    cat /tmp/s6-overlay.scripts.tar.xz.sha256
+    echo -n "Checksum of downloaded tarball: "
+    sha256sum /tmp/s6-overlay.scripts.tar.xz
+    exit 1
+  fi
+
+  
 
 # verify .tar.gz.sig (for older releases)
 elif [ -e /tmp/s6-overlay.tar.gz.sig ]; then
@@ -235,9 +283,19 @@ fi
 echo "[$APPNAME] Unpacking s6-overlay"
 
 # attempt to unpack .tar.xz
-if [ -e /tmp/s6-overlay.tar.xz ]; then
-  if tar -hxf /tmp/s6-overlay.tar.xz -C /; then
-    echo "[$APPNAME] s6-overlay unpacked ok"
+if [ -e /tmp/s6-overlay.binaries.tar.xz ]; then
+
+  # unpack binaries
+  if tar -hxf /tmp/s6-overlay.binaries.tar.xz -C /; then
+    echo "[$APPNAME] s6-overlay binaries unpacked ok"
+  else
+    echo "[$APPNAME] ERROR: s6-overlay did not unpack ok!"
+    exit 1
+  fi
+
+  # unpack scripts
+  if tar -hxf /tmp/s6-overlay.scripts.tar.xz -C /; then
+    echo "[$APPNAME] s6-overlay scripts unpacked ok"
   else
     echo "[$APPNAME] ERROR: s6-overlay did not unpack ok!"
     exit 1
@@ -269,16 +327,24 @@ echo "[$APPNAME] Testing s6-overlay"
 # Clean up
 echo "[$APPNAME] Cleaning up temp files"
 
-if [ -e /tmp/s6-overlay.tar.xz ]; then
-  rm /tmp/s6-overlay.tar.xz
+if [ -e /tmp/s6-overlay.binaries.tar.xz ]; then
+  rm /tmp/s6-overlay.binaries.tar.xz
+fi
+
+if [ -e /tmp/s6-overlay.scripts.tar.xz ]; then
+  rm /tmp/s6-overlay.scripts.tar.xz
 fi
 
 if [ -e /tmp/s6-overlay.tar.gz ]; then
   rm /tmp/s6-overlay.tar.gz
 fi
 
-if [ -e /tmp/s6-overlay.tar.xz.sha256 ]; then
-  rm /tmp/s6-overlay.tar.xz.sha256
+if [ -e /tmp/s6-overlay.binaries.tar.xz.sha256 ]; then
+  rm /tmp/s6-overlay.binaries.tar.xz.sha256
+fi
+
+if [ -e /tmp/s6-overlay.scripts.tar.xz.sha256 ]; then
+  rm /tmp/s6-overlay.scripts.tar.xz.sha256
 fi
 
 if [ -e /tmp/s6-overlay.tar.gz.sig ]; then
