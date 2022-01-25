@@ -288,7 +288,7 @@ if [ -e /tmp/s6-overlay.binaries.tar.xz.sha256 ]; then
   echo "$(cat /tmp/s6-overlay.binaries.tar.xz.sha256 | tr -s " " | cut -d " " -f 1)  /tmp/s6-overlay.binaries.tar.xz" > /tmp/s6-overlay.binaries.tar.xz.sha256
 
   # check binaries checksum
-  if sha256sum -c /tmp/s6-overlay.binaries.tar.xz.sha256; then
+  if sha256sum -c /tmp/s6-overlay.binaries.tar.xz.sha256 > /dev/null; then
     echo "[$APPNAME] binaries checksum verified ok"
   else
     echo "[$APPNAME] ERROR: binaries checksum did not verify ok"
@@ -303,7 +303,7 @@ if [ -e /tmp/s6-overlay.binaries.tar.xz.sha256 ]; then
   echo "$(cat /tmp/s6-overlay.scripts.tar.xz.sha256 | tr -s " " | cut -d " " -f 1)  /tmp/s6-overlay.scripts.tar.xz" > /tmp/s6-overlay.scripts.tar.xz.sha256
 
   # check scripts checksum
-  if sha256sum -c /tmp/s6-overlay.scripts.tar.xz.sha256; then
+  if sha256sum -c /tmp/s6-overlay.scripts.tar.xz.sha256 > /dev/null; then
     echo "[$APPNAME] scripts checksum verified ok"
   else
     echo "[$APPNAME] ERROR: scripts checksum did not verify ok"
@@ -318,7 +318,7 @@ if [ -e /tmp/s6-overlay.binaries.tar.xz.sha256 ]; then
   echo "$(cat /tmp/s6-overlay.symlinks-noarch.tar.xz.sha256 | tr -s " " | cut -d " " -f 1)  /tmp/s6-overlay.symlinks-noarch.tar.xz" > /tmp/s6-overlay.symlinks-noarch.tar.xz.sha256
 
   # check symlinks-noarch checksum
-  if sha256sum -c /tmp/s6-overlay.symlinks-noarch.tar.xz.sha256; then
+  if sha256sum -c /tmp/s6-overlay.symlinks-noarch.tar.xz.sha256 > /dev/null; then
     echo "[$APPNAME] symlinks-noarch checksum verified ok"
   else
     echo "[$APPNAME] ERROR: symlinks-noarch checksum did not verify ok"
@@ -333,7 +333,7 @@ if [ -e /tmp/s6-overlay.binaries.tar.xz.sha256 ]; then
   echo "$(cat /tmp/s6-overlay.symlinks-arch.tar.xz.sha256 | tr -s " " | cut -d " " -f 1)  /tmp/s6-overlay.symlinks-arch.tar.xz" > /tmp/s6-overlay.symlinks-arch.tar.xz.sha256
 
   # check symlinks-noarch checksum
-  if sha256sum -c /tmp/s6-overlay.symlinks-arch.tar.xz.sha256; then
+  if sha256sum -c /tmp/s6-overlay.symlinks-arch.tar.xz.sha256 > /dev/null; then
     echo "[$APPNAME] symlinks-arch checksum verified ok"
   else
     echo "[$APPNAME] ERROR: symlinks-arch checksum did not verify ok"
