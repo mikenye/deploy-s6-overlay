@@ -64,17 +64,17 @@ Examples follow:
 ...
 FROM alpine:latest
 RUN ...
-    apk add --no-cache file xz && \
+    apk add --no-cache file && \
     wget -q -O /tmp/deploy-s6-overlay.sh https://raw.githubusercontent.com/mikenye/deploy-s6-overlay/master/deploy-s6-overlay.sh && \
     sh /tmp/deploy-s6-overlay.sh && \
     rm /tmp/deploy-s6-overlay.sh && \
-    apk del --no-cache file xz && \
+    apk del --no-cache file && \
     ...
 ENTRYPOINT [ "/init" ]
 ...
 ```
 
-Note, Alpine includes `wget` so this is not explicitly installed.
+Note, Alpine includes `wget`, and the built-in `tar` supports `.tar.xz` natively, so `wget` and `xz` are not explicitly installed.
 
 ### Example for `debian:stable-slim`
 
