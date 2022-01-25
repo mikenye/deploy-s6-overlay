@@ -425,17 +425,15 @@ else
 
 fi
 
-# Test
+# Test s6-overlay by running some commands
 echo "[$APPNAME] Testing s6-overlay"
 
-# sync
-# ls -la /bin
-
-# sh -c /bin/s6-clock > /dev/null || exit 1
-# sh -c /bin/s6-echo > /dev/null || exit 1
-# sh -c /bin/s6-hostname > /dev/null || exit 1
-# sh -c "/bin/s6-ls /" > /dev/null || exit 1
-# sh -c /bin/s6-ps > /dev/null || exit 1
+s6-clock > /dev/null || exit 1
+s6-echo > /dev/null || exit 1
+s6-hostname > /dev/null || exit 1
+s6-ls / > /dev/null || exit 1
+s6-ps > /dev/null || exit 1
+execlineb -c "echo testing" > /dev/null || exit 1
 
 # Clean up
 echo "[$APPNAME] Cleaning up temp files"
