@@ -236,7 +236,7 @@ echo "[$APPNAME] Unpacking s6-overlay"
 
 # attempt to unpack .tar.xz
 if [ -e /tmp/s6-overlay.tar.xz ]; then
-  if tar -hf /tmp/s6-overlay.tar.xz -C /; then
+  if tar -hxf /tmp/s6-overlay.tar.xz -C /; then
     echo "[$APPNAME] s6-overlay unpacked ok"
   else
     echo "[$APPNAME] ERROR: s6-overlay did not unpack ok!"
@@ -245,7 +245,7 @@ if [ -e /tmp/s6-overlay.tar.xz ]; then
 
 # attempt to unpack .tar.gz
 elif [ -e /tmp/s6-overlay.tar.gz ]; then
-  if tar -hf /tmp/s6-overlay.tar.gz -C /; then
+  if tar -hxf /tmp/s6-overlay.tar.gz -C /; then
     echo "[$APPNAME] s6-overlay unpacked ok"
   else
     echo "[$APPNAME] ERROR: s6-overlay did not unpack ok!"
