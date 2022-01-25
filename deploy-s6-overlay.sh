@@ -187,8 +187,13 @@ fi
 
 # verify .tar.xz.sha256 (for newer releases)
 if [ -e /tmp/s6-overlay.tar.xz.sha256 ]; then
+
+  # re-write checksum file to reflect actual path of tarball
   SHA256SUM=$(cat /tmp/s6-overlay.tar.xz.sha256 | tr -s " " | cut -d " " -f 1)
-  if echo "$SHA256SUM /tmp/s6-overlay.tar.xz" | sha256sum -c; then
+  echo "$SHA256SUM  /tmp/s6-overlay.tar.xz" > /tmp/s6-overlay.tar.xz.sha256
+
+  # check checksum
+  if sha256sum -c /tmp/s6-overlay.tar.xz.sha256; then
     echo "[$APPNAME] checksum verified ok"
   else
     echo "[$APPNAME] ERROR: checksum did not verify ok"
