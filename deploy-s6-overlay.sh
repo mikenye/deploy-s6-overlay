@@ -36,6 +36,9 @@ if [ -z "${S6OVERLAY_VERSION}" ]; then
   fi
 fi
 
+# version variable that has no leading v
+S6OVERLAY_VERSION_NO_LEADING_V=$(echo "$S6OVERLAY_VERSION" | tr -d "v")
+
 # If S6 architecture not specified...
 if [ -z "${S6OVERLAY_ARCH}" ]; then
 
@@ -110,7 +113,7 @@ mkdir -p /tmp
 if [ "$DOWNLOADER" = "curl" ]; then
 
   # attempt to download binary tarball with .tar.xz extension (for newer releases)
-  if curl -s --location --output /tmp/s6-overlay.tar.xz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.xz"; then
+  if curl -s --location --output /tmp/s6-overlay.tar.xz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz"; then
     echo "[$APPNAME] s6-overlay binaries downloaded OK"
 
   # if above failed, attempt to download binary tarball with .tar.gz extension (for older releases)
@@ -124,7 +127,7 @@ if [ "$DOWNLOADER" = "curl" ]; then
   fi
 
   # attempt to download binary checksum with .tar.xz.sha256 extension (for newer releases)
-  if curl -s --location --output /tmp/s6-overlay.tar.xz.sha256 "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.xz.sha256"; then
+  if curl -s --location --output /tmp/s6-overlay.tar.xz.sha256 "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz.sha256"; then
     echo "[$APPNAME] s6-overlay binaries downloaded OK"
 
   # if above failed, attempt to download signature with .tar.gz.sig extension (for older releases)
@@ -140,7 +143,7 @@ if [ "$DOWNLOADER" = "curl" ]; then
 elif [ "$DOWNLOADER" = "wget" ]; then
 
   # attempt to download binary tarball with .tar.xz extension (for newer releases)
-  if wget -q -O /tmp/s6-overlay.tar.xz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.xz"; then
+  if wget -q -O /tmp/s6-overlay.tar.xz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz"; then
     echo "[$APPNAME] s6-overlay binaries downloaded OK"
 
   # if above failed, attempt to download binary tarball with .tar.gz extension (for older releases)
@@ -154,7 +157,7 @@ elif [ "$DOWNLOADER" = "wget" ]; then
   fi
 
   # attempt to download binary checksum with .tar.xz.sha256 extension (for newer releases)
-  if wget -q -O /tmp/s6-overlay.tar.xz.sha256 "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.xz.sha256"; then
+  if wget -q -O /tmp/s6-overlay.tar.xz.sha256 "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz.sha256"; then
     echo "[$APPNAME] s6-overlay binaries downloaded OK"
 
   # if above failed, attempt to download signature with .tar.gz.sig extension (for older releases)
