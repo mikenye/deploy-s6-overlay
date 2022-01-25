@@ -291,8 +291,6 @@ fi
 
 # Verify the download if possible
 
-ls -la /tmp
-
 # verify .tar.xz.sha256 (for newer releases)
 if [ -e /tmp/s6-overlay.binaries.tar.xz.sha256 ]; then
 
