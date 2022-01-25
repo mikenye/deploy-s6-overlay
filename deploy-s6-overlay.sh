@@ -427,6 +427,9 @@ fi
 
 # Test
 echo "[$APPNAME] Testing s6-overlay"
+
+ls -la /bin
+
 sh -c /bin/s6-clock > /dev/null || exit 1
 sh -c /bin/s6-echo > /dev/null || exit 1
 sh -c /bin/s6-hostname > /dev/null || exit 1
