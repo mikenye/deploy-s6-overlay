@@ -138,11 +138,11 @@ tar -C / -Jxpf /tmp/s6-overlay-symlinks.tar.xz
 
 # Test
 echo "[$APPNAME] Testing s6-overlay"
-/bin/s6-clock > /dev/null || exit 1
-/bin/s6-echo > /dev/null || exit 1
-/bin/s6-hostname > /dev/null || exit 1
-/bin/s6-ls / > /dev/null || exit 1
-/bin/s6-ps > /dev/null || exit 1
+/command/s6-clock > /dev/null || exit 1
+/command/s6-echo > /dev/null || exit 1
+/command/s6-hostname > /dev/null || exit 1
+/command/s6-ls / > /dev/null || exit 1
+/command/s6-ps > /dev/null || exit 1
 
 # Clean up
 echo "[$APPNAME] Cleaning up temp files"
