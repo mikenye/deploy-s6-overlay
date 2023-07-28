@@ -102,9 +102,9 @@ echo "[$APPNAME] Downloading s6-overlay-noarch"
 if [ "$DOWNLOADER" = "curl" ]
 then
     # https://github.com/just-containers/s6-overlay/releases/download/v3.1.5.0/s6-overlay-noarch.tar.xz
-    curl -s --location --output /tmp/s6-overlay.tar.gz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-noarch.tar.gz"
+    curl -s --location --output /tmp/s6-overlay-noarch.tar.gz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-noarch.tar.gz"
 else
-    wget -q -O -/tmp/s6-overlay.tar.gz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-noarch.tar.gz"
+    wget -q -O /tmp/s6-overlay-noarch.tar.gz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-noarch.tar.gz"
 fi
 
 echo "[$APPNAME] Downloading s6-overlay-${S6OVERLAY_ARCH}"
@@ -122,9 +122,9 @@ echo "[$APPNAME] Downloading s6-overlay-symlinks"
 if [ "$DOWNLOADER" = "curl" ]
 then
     # https://github.com/just-containers/s6-overlay/releases/download/v3.1.5.0/s6-overlay-symlinks-noarch.tar.xz
-    curl -s --location --output /tmp/s6-overlay.tar.gz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-symlinks-noarch.tar.gz"
+    curl -s --location --output /tmp/s6-overlay-symlinks.tar.gz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-symlinks-noarch.tar.gz"
 else
-    wget -q -O -/tmp/s6-overlay.tar.gz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-symlinks-noarch.tar.gz"
+    wget -q -O -/tmp/s6-overlay-symlinks.tar.gz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-symlinks-noarch.tar.gz"
 fi
 
 # extract all the tarballs
