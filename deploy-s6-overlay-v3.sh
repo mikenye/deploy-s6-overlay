@@ -144,6 +144,10 @@ echo "[$APPNAME] Testing s6-overlay"
 /command/s6-ls / > /dev/null || exit 1
 /command/s6-ps > /dev/null || exit 1
 
+# fix execlinb issues
+echo "[$APPNAME] Fixing execlineb issues"
+ln -s /command/execlineb /usr/bin/execlineb
+
 # Clean up
 echo "[$APPNAME] Cleaning up temp files"
 rm /tmp/s6-overlay*
