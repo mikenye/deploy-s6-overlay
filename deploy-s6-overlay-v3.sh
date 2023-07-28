@@ -146,10 +146,6 @@ echo "[$APPNAME] Testing s6-overlay"
 
 # Clean up
 echo "[$APPNAME] Cleaning up temp files"
-rm /tmp/s6-overlay.tar.gz
-if [ $VERIFY -eq 1 ]
-then
-  rm /tmp/s6-overlay.tar.gz.sig
-fi
+rm /tmp/s6-overlay*
 
 echo "[$APPNAME] s6-overlay deployment finished ok"
