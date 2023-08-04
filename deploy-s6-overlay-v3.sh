@@ -144,9 +144,17 @@ echo "[$APPNAME] Testing s6-overlay"
 /command/s6-ls / > /dev/null || exit 1
 /command/s6-ps > /dev/null || exit 1
 
-# fix execlinb issues
-echo "[$APPNAME] Fixing execlineb issues"
+# fix command path issues
+echo "[$APPNAME] Fixing command pathing issues"
 ln -s /command/execlineb /usr/bin/execlineb
+ln -s /command/ifelse /usr/bin/ifelse
+ln -s /command/importas /usr/bin/importas
+ln -s /command/eltest /usr/bin/eltest
+ln -s /command/emptyenv /usr/bin/emptyenv
+ln -s /command/s6-envdir /usr/bin/s6-envdir
+ln -s /command/exec /usr/bin/exec
+ln -s /command/s6-svdt /usr/bin/s6-svdt
+ln -s /command/s6-svdt-clear /usr/bin/s6-svdt-clear
 
 # Clean up
 echo "[$APPNAME] Cleaning up temp files"
