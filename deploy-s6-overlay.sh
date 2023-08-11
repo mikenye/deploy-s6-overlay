@@ -4,11 +4,6 @@
 APPNAME="deploy-s6-overlay"
 echo "[$APPNAME] s6-overlay deployment started"
 
-# If user has not specified a version, temporarily pin version v2.2.0.3 - v3.0.0.0 does not yet have binary releases
-if [ -z "$S6OVERLAY_VERSION" ]; then
-  S6OVERLAY_VERSION="v2.2.0.3"
-fi
-
 # Determine which downloader to use
 # Check if curl is available
 if which curl > /dev/null 2>&1; then
@@ -25,27 +20,13 @@ else
   fi
 fi
 
-# Temporarily disable verifying.
-# As of https://github.com/just-containers/s6-overlay/commit/4f4ea4c4741851c611f960230ccd2835d67702bd, 
-# releases are not signed.
-# Hopefully this can be re-enabled soon.
-VERIFY=0
-# # Determine if gpg is available to verify our download
-# if which gpg > /dev/null 2>&1; then
-#   echo "[$APPNAME] Found gpg"
-#   VERIFY=1
-# else
-#   echo "[$APPNAME] WARNING: gpg not available! Cannot verify s6-overlay download!"
-#   VERIFY=0
-# fi
-
 # If S6 version not specified...
 if [ -z "${S6OVERLAY_VERSION}" ]; then
   echo "[$APPNAME] Determining latest version of s6-overlay"
   # Determine which version of s6 overlay to use
   if [ "$DOWNLOADER" = "curl" ]
   then
-    S6OVERLAY_VERSION=$(curl -s https://api.github.com/repos/just-containers/s6-overlay/releases/latest | grep '"name"' | head -1 | cut -d ":" -f 2 | tr -d " " | tr -d '"' | tr -d ",")
+    S6OVERLAY_VERSION=$(curl --fail -s https://api.github.com/repos/just-containers/s6-overlay/releases/latest | grep '"name"' | head -1 | cut -d ":" -f 2 | tr -d " " | tr -d '"' | tr -d ",")
   elif [ "$DOWNLOADER" = "wget" ]
   then
     S6OVERLAY_VERSION=$(wget -O - -q https://api.github.com/repos/just-containers/s6-overlay/releases/latest | grep '"name"' | head -1 | cut -d ":" -f 2 | tr -d " " | tr -d '"' | tr -d ",")
@@ -59,29 +40,6 @@ fi
 if [ -z "${S6OVERLAY_ARCH}" ]; then
 
   echo "[$APPNAME] Determining architecture of target image"
-
-  #-----
-  #
-  # This old method of using `uname -m` has been abandoned.
-  # If cross-building (ie: building for i386 on amd64),
-  # You'd get the wrong architecture, as `uname -m` would return amd64.
-
-  # # Use the architecture of the build platform
-  # ARCH=$(uname -m)
-
-  # # Make architecture names match s6 overlay architecture names
-  # if [ ${ARCH} = "aarch64" ]; then
-  #   S6OVERLAY_ARCH="aarch64"
-  # elif [ ${ARCH} = "x86_64" ]; then
-  #   S6OVERLAY_ARCH="amd64"
-  # elif [ ${ARCH} = "armv7l" ]; then
-  #   S6OVERLAY_ARCH="armhf"
-  # else
-  #   echo "Unknown architecture"
-  #   exit 1
-  # fi
-  #
-  #-----
 
   # If cross-building, we have no way to determine this without looking at the installed binaries using libmagic/file
   # Do we have libmagic/file installed
@@ -143,71 +101,406 @@ if [ -z "${S6OVERLAY_ARCH}" ]; then
   exit 1
 fi
 
+# prepare extra variables needed for v3+
+S6OVERLAY_VERSION_NO_LEADING_V=$(echo "$S6OVERLAY_VERSION" | tr -d "v")
+case $S6OVERLAY_ARCH in
+  x86)
+    S6OVERLAY_ARCH_V3="i686"
+    ;;
+  amd64)
+    S6OVERLAY_ARCH_V3="x86_64"
+    ;;
+  arm)
+    S6OVERLAY_ARCH_V3="arm"
+    ;;
+  armhf)
+    S6OVERLAY_ARCH_V3="armhf"
+    ;;
+  aarch64)
+    S6OVERLAY_ARCH_V3="aarch64"
+    ;;
+  *)
+    echo "[$APPNAME] ERROR: Unable to determine architecture or unsupported architecture!"
+    exit 1
+    ;;
+esac
+
 echo "[$APPNAME] Deploying s6-overlay version ${S6OVERLAY_VERSION} for architecture ${S6OVERLAY_ARCH}"
 
-# Download S6 Overlay
+# Download S6 Overlay binaries/signatures/checksums
 mkdir -p /tmp
-echo "[$APPNAME] Downloading s6-overlay from: https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz"
+
 # Determine which version of s6 overlay to use
-if [ "$DOWNLOADER" = "curl" ]
-then
-  curl -s --location --output /tmp/s6-overlay.tar.gz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz"
-  if [ $VERIFY -eq 1 ]
-  then
-#     echo "[$APPNAME] Importing justcontainers gpg key from: https://keybase.io/justcontainers/key.asc"
-#     curl -s --location https://keybase.io/justcontainers/key.asc | gpg --import
-    echo "[$APPNAME] Downloading s6-overlay signature from: https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz.sig"
-    curl -s --location --output /tmp/s6-overlay.tar.gz.sig "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz.sig"
+if [ "$DOWNLOADER" = "curl" ]; then
+
+  # attempt to download binary tarball with .tar.xz extension (for newer releases)
+  if curl --fail -s --location --output /tmp/s6-overlay.binaries.tar.xz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH_V3}-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz"; then
+    echo "[$APPNAME] s6-overlay binaries downloaded OK"
+
+    # attempt to download overlay scripts tarball
+    if curl --fail -s --location --output /tmp/s6-overlay.scripts.tar.xz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-noarch-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz"; then
+      echo "[$APPNAME] s6-overlay scripts downloaded OK"
+    else
+      echo "[$APPNAME] ERROR: could not download s6-overlay scripts!"
+      exit 1
+    fi
+
+    # attempt to download overlay symlinks-noarch tarball
+    if curl --fail -s --location --output /tmp/s6-overlay.symlinks-noarch.tar.xz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-symlinks-noarch-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz"; then
+      echo "[$APPNAME] s6-overlay symlinks-noarch downloaded OK"
+    else
+      echo "[$APPNAME] ERROR: could not download s6-overlay symlinks-noarch!"
+      exit 1
+    fi
+
+    # attempt to download overlay symlinks-arch tarball
+    if curl --fail -s --location --output /tmp/s6-overlay.symlinks-arch.tar.xz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-symlinks-arch-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz"; then
+      echo "[$APPNAME] s6-overlay symlinks-arch downloaded OK"
+    else
+      echo "[$APPNAME] ERROR: could not download s6-overlay symlinks-arch!"
+      exit 1
+    fi
+
+  # if above failed, attempt to download binary tarball with .tar.gz extension (for older releases)
+  elif curl --fail -s --location --output /tmp/s6-overlay.tar.gz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz"; then
+    echo "[$APPNAME] s6-overlay binaries downloaded OK"
+
+  # if above downloads all failed, then error
+  else
+    echo "[$APPNAME] ERROR: could not download s6-overlay binaries!"
+    exit 1
   fi
-elif [ "$DOWNLOADER" = "wget" ]
-then
-  wget -q -O /tmp/s6-overlay.tar.gz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz"
-  if [ $VERIFY -eq 1 ]
-  then
-#     echo "[$APPNAME] Importing justcontainers gpg key from: https://keybase.io/justcontainers/key.asc"
-#     wget -q -O - https://keybase.io/justcontainers/key.asc | gpg --import
-    echo "[$APPNAME] Downloading s6-overlay signature from: https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz.sig"
-    wget -q -O /tmp/s6-overlay.tar.gz.sig "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz.sig"
+
+  # attempt to download binary checksum with .tar.xz.sha256 extension (for newer releases)
+  if curl --fail -s --location --output /tmp/s6-overlay.binaries.tar.xz.sha256 "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH_V3}-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz.sha256"; then
+    echo "[$APPNAME] s6-overlay binaries checksum downloaded OK"
+
+    # attempt to download overlay scripts tarball checksum
+    if curl --fail -s --location --output /tmp/s6-overlay.scripts.tar.xz.sha256 "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-noarch-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz.sha256"; then
+      echo "[$APPNAME] s6-overlay scripts checksum downloaded OK"
+    else
+      echo "[$APPNAME] ERROR: could not download s6-overlay scripts checksum!"
+      exit 1
+    fi
+
+    # attempt to download overlay symlinks-noarch tarball checksum
+    if curl --fail -s --location --output /tmp/s6-overlay.symlinks-noarch.tar.xz.sha256 "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-symlinks-noarch-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz.sha256"; then
+      echo "[$APPNAME] s6-overlay symlinks-noarch checksum downloaded OK"
+    else
+      echo "[$APPNAME] ERROR: could not download s6-overlay symlinks-noarch checksum!"
+      exit 1
+    fi
+
+    # attempt to download overlay symlinks-arch tarball checksum
+    if curl --fail -s --location --output /tmp/s6-overlay.symlinks-arch.tar.xz.sha256 "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-symlinks-arch-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz.sha256"; then
+      echo "[$APPNAME] s6-overlay symlinks-arch checksum downloaded OK"
+    else
+      echo "[$APPNAME] ERROR: could not download s6-overlay symlinks-arch checksum!"
+      exit 1
+    fi
+
+  # if above failed, attempt to download signature with .tar.gz.sig extension (for older releases)
+  elif curl --fail -s --location --output /tmp/s6-overlay.tar.gz.sig "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz.sig"; then
+    echo "[$APPNAME] s6-overlay signature downloaded OK"
+
+  # if above downloads all failed, then error
+  else
+    echo "[$APPNAME] ERROR: could not download s6-overlay checksum/signature!"
+    exit 1
   fi
+
+elif [ "$DOWNLOADER" = "wget" ]; then
+
+  # attempt to download binary tarball with .tar.xz extension (for newer releases)
+  if wget -q -O /tmp/s6-overlay.binaries.tar.xz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH_V3}-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz"; then
+    echo "[$APPNAME] s6-overlay binaries downloaded OK"
+
+    # attempt to download overlay scripts tarball
+    if wget -q -O /tmp/s6-overlay.scripts.tar.xz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-noarch-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz"; then
+      echo "[$APPNAME] s6-overlay scripts downloaded OK"
+    else
+      echo "[$APPNAME] ERROR: could not download s6-overlay scripts!"
+      exit 1
+    fi
+
+    # attempt to download overlay symlinks-noarch tarball
+    if wget -q -O /tmp/s6-overlay.symlinks-noarch.tar.xz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-symlinks-noarch-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz"; then
+      echo "[$APPNAME] s6-overlay symlinks-noarch downloaded OK"
+    else
+      echo "[$APPNAME] ERROR: could not download s6-overlay symlinks-noarch!"
+      exit 1
+    fi
+
+    # attempt to download overlay symlinks-arch tarball
+    if wget -q -O /tmp/s6-overlay.symlinks-arch.tar.xz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-symlinks-arch-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz"; then
+      echo "[$APPNAME] s6-overlay symlinks-arch downloaded OK"
+    else
+      echo "[$APPNAME] ERROR: could not download s6-overlay symlinks-arch!"
+      exit 1
+    fi
+
+  # if above failed, attempt to download binary tarball with .tar.gz extension (for older releases)
+  elif wget -q -O /tmp/s6-overlay.tar.gz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz"; then
+    echo "[$APPNAME] s6-overlay binaries downloaded OK"
+    
+    # remove zero-length file from attempted download of .tar.xz from above 'if'
+    if [ -e /tmp/s6-overlay.binaries.tar.xz ]; then
+      rm /tmp/s6-overlay.binaries.tar.xz
+    fi
+
+  # if above downloads all failed, then error
+  else
+    echo "[$APPNAME] ERROR: could not download s6-overlay binaries!"
+    exit 1
+  fi
+
+  # attempt to download binary checksum with .tar.xz.sha256 extension (for newer releases)
+  if wget -q -O /tmp/s6-overlay.binaries.tar.xz.sha256 "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH_V3}-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz.sha256"; then
+    echo "[$APPNAME] s6-overlay binaries checksum downloaded OK"
+
+    # attempt to download overlay scripts tarball checksum
+    if wget -q -O /tmp/s6-overlay.scripts.tar.xz.sha256 "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-noarch-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz.sha256"; then
+      echo "[$APPNAME] s6-overlay scripts checksum downloaded OK"
+    else
+      echo "[$APPNAME] ERROR: could not download s6-overlay scripts checksum!"
+      exit 1
+    fi
+
+    # attempt to download overlay symlinks-noarch tarball checksum
+    if wget -q -O /tmp/s6-overlay.symlinks-noarch.tar.xz.sha256 "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-symlinks-noarch-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz.sha256"; then
+      echo "[$APPNAME] s6-overlay symlinks-noarch checksum downloaded OK"
+    else
+      echo "[$APPNAME] ERROR: could not download s6-overlay symlinks-noarch checksum!"
+      exit 1
+    fi
+
+    # attempt to download overlay symlinks-arch tarball checksum
+    if wget -q -O /tmp/s6-overlay.symlinks-arch.tar.xz.sha256 "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-symlinks-arch-${S6OVERLAY_VERSION_NO_LEADING_V}.tar.xz.sha256"; then
+      echo "[$APPNAME] s6-overlay symlinks-arch checksum downloaded OK"
+    else
+      echo "[$APPNAME] ERROR: could not download s6-overlay symlinks-arch checksum!"
+      exit 1
+    fi
+
+  # if above failed, attempt to download signature with .tar.gz.sig extension (for older releases)
+  elif wget -q -O /tmp/s6-overlay.tar.gz.sig "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.gz.sig"; then
+    echo "[$APPNAME] s6-overlay signature downloaded OK"
+
+    # remove zero-length file from attempted download of .tar.xz.sha256 from above 'if'
+    if [ -e /tmp/s6-overlay.binaries.tar.xz.sha256 ]; then
+      rm /tmp/s6-overlay.binaries.tar.xz.sha256
+    fi
+
+  # if above downloads all failed, then error
+  else
+    echo "[$APPNAME] ERROR: could not download s6-overlay checksum/signature!"
+    exit 1
+  fi
+
+# if no wget/curl, then error
 else
   echo "[$APPNAME] ERROR: could not determine downloader!"
   exit 1
 fi
 
-# Verify the download
-if [ $VERIFY -eq 1 ]; then
+# Verify the download if possible
 
-  gpg --keyserver hkps://keyserver.ubuntu.com --recv 337EE704693C17EF
+# verify .tar.xz.sha256 (for newer releases)
+if [ -e /tmp/s6-overlay.binaries.tar.xz.sha256 ]; then
 
-  # Verify download
-  echo "[$APPNAME] Verifying s6-overlay download with gpg"
-  if gpg --verify /tmp/s6-overlay.tar.gz.sig /tmp/s6-overlay.tar.gz;
-  then
-    echo "[$APPNAME] s6-overlay.tar.gz verified ok"
+  # re-write checksum file to reflect actual path of binaries tarball
+  echo "$(tr -s " " < /tmp/s6-overlay.binaries.tar.xz.sha256 | cut -d " " -f 1)  /tmp/s6-overlay.binaries.tar.xz" > /tmp/s6-overlay.binaries.tar.xz.sha256
+
+  # check binaries checksum
+  if sha256sum -c /tmp/s6-overlay.binaries.tar.xz.sha256 > /dev/null; then
+    echo "[$APPNAME] binaries checksum verified ok"
   else
-    echo "[$APPNAME] ERROR: s6-overlay.tar.gz did not verify ok"
+    echo "[$APPNAME] ERROR: binaries checksum did not verify ok"
+    echo "Downloaded checksum file: "
+    cat /tmp/s6-overlay.binaries.tar.xz.sha256
+    echo "Checksum of downloaded tarball: "
+    sha256sum /tmp/s6-overlay.binaries.tar.xz
     exit 1
   fi
+
+  # re-write checksum file to reflect actual path of scripts tarball
+  echo "$(tr -s " " < /tmp/s6-overlay.scripts.tar.xz.sha256 | cut -d " " -f 1)  /tmp/s6-overlay.scripts.tar.xz" > /tmp/s6-overlay.scripts.tar.xz.sha256
+
+  # check scripts checksum
+  if sha256sum -c /tmp/s6-overlay.scripts.tar.xz.sha256 > /dev/null; then
+    echo "[$APPNAME] scripts checksum verified ok"
+  else
+    echo "[$APPNAME] ERROR: scripts checksum did not verify ok"
+    echo "Downloaded checksum file: "
+    cat /tmp/s6-overlay.scripts.tar.xz.sha256
+    echo "Checksum of downloaded tarball: "
+    sha256sum /tmp/s6-overlay.scripts.tar.xz
+    exit 1
+  fi
+
+  # re-write checksum file to reflect actual path of symlinks-noarch tarball
+  echo "$(tr -s " " < /tmp/s6-overlay.symlinks-noarch.tar.xz.sha256 | cut -d " " -f 1)  /tmp/s6-overlay.symlinks-noarch.tar.xz" > /tmp/s6-overlay.symlinks-noarch.tar.xz.sha256
+
+  # check symlinks-noarch checksum
+  if sha256sum -c /tmp/s6-overlay.symlinks-noarch.tar.xz.sha256 > /dev/null; then
+    echo "[$APPNAME] symlinks-noarch checksum verified ok"
+  else
+    echo "[$APPNAME] ERROR: symlinks-noarch checksum did not verify ok"
+    echo "Downloaded checksum file: "
+    cat /tmp/s6-overlay.symlinks-noarch.tar.xz.sha256
+    echo "Checksum of downloaded tarball: "
+    sha256sum /tmp/s6-overlay.symlinks-noarch.tar.xz
+    exit 1
+  fi
+
+  # re-write checksum file to reflect actual path of symlinks-noarch tarball
+  echo "$(tr -s " " < /tmp/s6-overlay.symlinks-arch.tar.xz.sha256 | cut -d " " -f 1)  /tmp/s6-overlay.symlinks-arch.tar.xz" > /tmp/s6-overlay.symlinks-arch.tar.xz.sha256
+
+  # check symlinks-noarch checksum
+  if sha256sum -c /tmp/s6-overlay.symlinks-arch.tar.xz.sha256 > /dev/null; then
+    echo "[$APPNAME] symlinks-arch checksum verified ok"
+  else
+    echo "[$APPNAME] ERROR: symlinks-arch checksum did not verify ok"
+    echo "Downloaded checksum file: "
+    cat /tmp/s6-overlay.symlinks-arch.tar.xz.sha256
+    echo "Checksum of downloaded tarball: "
+    sha256sum /tmp/s6-overlay.symlinks-arch.tar.xz
+    exit 1
+  fi
+
+# verify .tar.gz.sig (for older releases)
+elif [ -e /tmp/s6-overlay.tar.gz.sig ]; then
+
+  # check if gpg is available
+  if which gpg > /dev/null 2>&1; then
+    echo "[$APPNAME] Found gpg, will attempt to verify"
+
+    # import key   
+    gpg --keyserver hkps://keyserver.ubuntu.com --recv 337EE704693C17EF
+
+    # verify signature
+    if gpg --verify /tmp/s6-overlay.tar.gz.sig /tmp/s6-overlay.tar.gz; then
+      echo "[$APPNAME] s6-overlay.tar.gz verified ok"
+    else
+      echo "[$APPNAME] ERROR: s6-overlay.tar.gz did not verify ok"
+      exit 1
+    fi
+
+  else
+    echo "[$APPNAME] WARNING: gpg not found. Unable to verify download."
+  fi
+
+# should never get here, so error
+else
+  echo "[$APPNAME] WARNING: no checksum/signature file available. Unable to verify download."
 fi
 
 # Install s6-overlay
 echo "[$APPNAME] Unpacking s6-overlay"
-tar -hxzf /tmp/s6-overlay.tar.gz -C /
 
-# Test
+# attempt to unpack .tar.xz
+if [ -e /tmp/s6-overlay.binaries.tar.xz ]; then
+
+  # unpack binaries
+  if tar -hxf /tmp/s6-overlay.binaries.tar.xz -C /; then
+    echo "[$APPNAME] s6-overlay binaries unpacked ok"
+  else
+    echo "[$APPNAME] ERROR: s6-overlay binaries did not unpack ok!"
+    exit 1
+  fi
+
+  # unpack scripts
+  if tar -hxf /tmp/s6-overlay.scripts.tar.xz -C /; then
+    echo "[$APPNAME] s6-overlay scripts unpacked ok"
+  else
+    echo "[$APPNAME] ERROR: s6-overlay scripts did not unpack ok!"
+    exit 1
+  fi
+
+  # unpack symlinks-noarch
+  if tar -hxf /tmp/s6-overlay.symlinks-noarch.tar.xz -C /; then
+    echo "[$APPNAME] s6-overlay symlinks-noarch unpacked ok"
+  else
+    echo "[$APPNAME] ERROR: s6-overlay symlinks-noarch did not unpack ok!"
+    exit 1
+  fi
+
+  # unpack symlinks-arch
+  if tar -hxf /tmp/s6-overlay.symlinks-arch.tar.xz -C /; then
+    echo "[$APPNAME] s6-overlay symlinks-arch unpacked ok"
+  else
+    echo "[$APPNAME] ERROR: s6-overlay symlinks-arch did not unpack ok!"
+    exit 1
+  fi
+
+# attempt to unpack .tar.gz
+elif [ -e /tmp/s6-overlay.tar.gz ]; then
+  if tar -hxf /tmp/s6-overlay.tar.gz -C /; then
+    echo "[$APPNAME] s6-overlay unpacked ok"
+  else
+    echo "[$APPNAME] ERROR: s6-overlay did not unpack ok!"
+    exit 1
+  fi
+
+# should never get here, so error
+else
+  echo "[$APPNAME] ERROR: no tarball to unpack!"
+  exit 1
+
+fi
+
+# Test s6-overlay by running some commands
 echo "[$APPNAME] Testing s6-overlay"
-/bin/s6-clock > /dev/null || exit 1
-/bin/s6-echo > /dev/null || exit 1
-/bin/s6-hostname > /dev/null || exit 1
-/bin/s6-ls / > /dev/null || exit 1
-/bin/s6-ps > /dev/null || exit 1
+
+s6-clock > /dev/null || exit 1
+s6-echo > /dev/null || exit 1
+s6-hostname > /dev/null || exit 1
+s6-ls / > /dev/null || exit 1
+s6-ps > /dev/null || exit 1
+execlineb -c "echo testing" > /dev/null || exit 1
 
 # Clean up
 echo "[$APPNAME] Cleaning up temp files"
-rm /tmp/s6-overlay.tar.gz
-if [ $VERIFY -eq 1 ]
-then
+
+if [ -e /tmp/s6-overlay.binaries.tar.xz ]; then
+  rm /tmp/s6-overlay.binaries.tar.xz
+fi
+
+if [ -e /tmp/s6-overlay.scripts.tar.xz ]; then
+  rm /tmp/s6-overlay.scripts.tar.xz
+fi
+
+if [ -e /tmp/s6-overlay.symlinks-noarch.tar.xz ]; then
+  rm /tmp/s6-overlay.symlinks-noarch.tar.xz
+fi
+
+if [ -e /tmp/s6-overlay.symlinks-arch.tar.xz ]; then
+  rm /tmp/s6-overlay.symlinks-arch.tar.xz
+fi
+
+if [ -e /tmp/s6-overlay.tar.gz ]; then
+  rm /tmp/s6-overlay.tar.gz
+fi
+
+if [ -e /tmp/s6-overlay.binaries.tar.xz.sha256 ]; then
+  rm /tmp/s6-overlay.binaries.tar.xz.sha256
+fi
+
+if [ -e /tmp/s6-overlay.scripts.tar.xz.sha256 ]; then
+  rm /tmp/s6-overlay.scripts.tar.xz.sha256
+fi
+
+if [ -e /tmp/s6-overlay.symlinks-noarch.tar.xz.sha256 ]; then
+  rm /tmp/s6-overlay.symlinks-noarch.tar.xz.sha256
+fi
+
+if [ -e /tmp/s6-overlay.symlinks-arch.tar.xz.sha256 ]; then
+  rm /tmp/s6-overlay.symlinks-arch.tar.xz.sha256
+fi
+
+if [ -e /tmp/s6-overlay.tar.gz.sig ]; then
   rm /tmp/s6-overlay.tar.gz.sig
 fi
 
-echo "[$APPNAME] s6-overlay deployment finished ok"
+echo "[$APPNAME] s6-overlay deployment finished successfully"
+exit 0
