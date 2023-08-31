@@ -123,8 +123,6 @@ echo "[$APPNAME] Extracting s6-overlay-noarch"
 tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz
 echo "[$APPNAME] Extracting s6-overlay-${S6OVERLAY_ARCH}"
 tar -C / -Jxpf /tmp/s6-overlay.tar.xz
-echo "[$APPNAME] Extracting s6-overlay-symlinks"
-tar -C / -Jxpf /tmp/s6-overlay-symlinks.tar.xz
 
 # Test
 echo "[$APPNAME] Testing s6-overlay"
