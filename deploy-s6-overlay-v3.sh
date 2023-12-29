@@ -6,7 +6,7 @@ echo "[$APPNAME] s6-overlay deployment started"
 
 # If the user has not specified a version to deploy, pin version v3.1.5.0
 if [ -z "$S6OVERLAY_VERSION" ]; then
-  S6OVERLAY_VERSION="v3.1.5.0"
+  S6OVERLAY_VERSION="v3.1.6.2"
 fi
 
 # Determine which downloader to use
@@ -117,24 +117,12 @@ else
     wget -q -O /tmp/s6-overlay.tar.xz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-${S6OVERLAY_ARCH}.tar.xz"
 fi
 
-echo "[$APPNAME] Downloading s6-overlay-symlinks https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-symlinks-noarch.tar.xz"
-
-if [ "$DOWNLOADER" = "curl" ]
-then
-    # https://github.com/just-containers/s6-overlay/releases/download/v3.1.5.0/s6-overlay-symlinks-noarch.tar.xz
-    curl -s --location --output /tmp/s6-overlay-symlinks.tar.xz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-symlinks-noarch.tar.xz"
-else
-    wget -q -O -/tmp/s6-overlay-symlinks.tar.xz "https://github.com/just-containers/s6-overlay/releases/download/${S6OVERLAY_VERSION}/s6-overlay-symlinks-noarch.tar.xz"
-fi
-
 # extract all the tarballs
 
 echo "[$APPNAME] Extracting s6-overlay-noarch"
 tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz
 echo "[$APPNAME] Extracting s6-overlay-${S6OVERLAY_ARCH}"
 tar -C / -Jxpf /tmp/s6-overlay.tar.xz
-echo "[$APPNAME] Extracting s6-overlay-symlinks"
-tar -C / -Jxpf /tmp/s6-overlay-symlinks.tar.xz
 
 # Test
 echo "[$APPNAME] Testing s6-overlay"
@@ -143,18 +131,6 @@ echo "[$APPNAME] Testing s6-overlay"
 /command/s6-hostname > /dev/null || exit 1
 /command/s6-ls / > /dev/null || exit 1
 /command/s6-ps > /dev/null || exit 1
-
-# fix command path issues
-echo "[$APPNAME] Fixing command pathing issues"
-ln -s /command/execlineb /usr/bin/execlineb
-ln -s /command/ifelse /usr/bin/ifelse
-ln -s /command/importas /usr/bin/importas
-ln -s /command/eltest /usr/bin/eltest
-ln -s /command/emptyenv /usr/bin/emptyenv
-ln -s /command/s6-envdir /usr/bin/s6-envdir
-ln -s /command/exec /usr/bin/exec
-ln -s /command/s6-svdt /usr/bin/s6-svdt
-ln -s /command/s6-svdt-clear /usr/bin/s6-svdt-clear
 
 # Clean up
 echo "[$APPNAME] Cleaning up temp files"
