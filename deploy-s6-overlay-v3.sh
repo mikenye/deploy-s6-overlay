@@ -6,7 +6,7 @@ echo "[$APPNAME] s6-overlay deployment started"
 
 # If the user has not specified a version to deploy, pin version v3.1.5.0
 if [ -z "$S6OVERLAY_VERSION" ]; then
-  S6OVERLAY_VERSION="v3.1.5.0"
+  S6OVERLAY_VERSION="v3.1.6.2"
 fi
 
 # Determine which downloader to use
